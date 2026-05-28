@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Empresa - Detalle de candidato')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-empresa :: navEmpresa}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <div th:replace="~{fragmentos/page-header :: pageHeader('Detalle del candidato', 'Consulte la información general del oferente y el estado de su currículum.')}"></div>
+
+    <section class="section-block" th:if="${oferente != null}">
+        <div class="grid-2-equal">
+
+            <div class="content-card">
+                <h2 class="section-title">Información personal</h2>
+                <p class="section-subtitle">
+                    Datos generales registrados por el oferente en la plataforma.
+                </p>
+
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Nombre completo:</span>
+                        <span class="detail-value">
+                            <span th:text="${oferente.nombre}">Juan</span>
+                            <span th:text="${oferente.apellido}">Pérez</span>
+                        </span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Identificación:</span>
+                        <span class="detail-value" th:text="${oferente.identificacion}">123456789</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Correo:</span>
+                        <span class="detail-value" th:text="${oferente.usuarios.correo}">correo@ejemplo.com</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Nacionalidad:</span>
+                        <span class="detail-value" th:text="${oferente.nacionalidad}">Costa Rica</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Residencia:</span>
+                        <span class="detail-value" th:text="${oferente.residencia}">Heredia</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Estado del perfil:</span>
+                        <span class="detail-value">Oferente registrado</span>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <h3 class="card-title">Acciones rápidas</h3>
+                    <div class="quick-links">
+                        <a th:href="@{/empresa/mis-puestos-empresa}" class="btn btn-secondary">Volver a puestos</a>
+                        <a th:href="@{/empresa/mis-puestos-empresa}" class="btn btn-primary">Ir a mis puestos</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Currículum</h2>
+                <p class="section-subtitle">
+                    Estado del documento profesional asociado a este candidato.
+                </p>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>CV registrado</h3>
+                        <p th:if="${tieneCv}">Sí</p>
+                        <p th:if="${!tieneCv}">No</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Formato esperado</h3>
+                        <p>PDF</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Disponibilidad</h3>
+                        <p th:if="${tieneCv}">Visible</p>
+                        <p th:if="${!tieneCv}">Sin archivo</p>
+                    </div>
+                </div>
+
+                <div class="mt-3 cv-box" th:if="${tieneCv}">
+                    <p class="cv-status">
+                        El candidato cuenta con un currículum registrado en el sistema.
+                    </p>
+
+                    <div class="mt-2" style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #fff;">
+                        <iframe
+                                th:src="@{${urlPreviewCv}}"
+                                title="Vista previa del CV"
+                                style="width: 100%; height: 340px; border: 0;"
+                        ></iframe>
+                    </div>
+
+                    <div class="quick-links mt-2">
+                        <a th:href="@{${urlPreviewCv}}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Abrir vista completa</a>
+                        <a th:href="@{/api/cv/descargar/{id}(id=${oferente.id})}" class="btn btn-secondary" target="_blank">Descargar CV</a>
+                    </div>
+                </div>
+
+                <div class="empty-state mt-3" th:if="${!tieneCv}">
+                    <p>Este candidato no tiene un currículum disponible en este momento.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="section-block" th:if="${oferente != null}">
+        <div class="content-card">
+            <h2 class="section-title">Resumen del perfil</h2>
+            <p class="section-subtitle">
+                Vista general de la información profesional disponible actualmente.
+            </p>
+
+            <div class="detail-list">
+                <div class="detail-item">
+                    <span class="detail-label">Nombre del candidato:</span>
+                    <span class="detail-value">
+                        <span th:text="${oferente.nombre}">Juan</span>
+                        <span th:text="${oferente.apellido}">Pérez</span>
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Ubicación reportada:</span>
+                    <span class="detail-value" th:text="${oferente.residencia}">Heredia</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Nacionalidad registrada:</span>
+                    <span class="detail-value" th:text="${oferente.nacionalidad}">Costa Rica</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Documento curricular:</span>
+                    <span class="detail-value" th:text="${oferente.curriculumPdf != null ? 'Disponible' : 'No disponible'}">Disponible</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block" th:if="${habilidades != null and !#lists.isEmpty(habilidades)}">
+        <div class="content-card">
+            <h2 class="section-title">Habilidades registradas</h2>
+            <p class="section-subtitle">
+                Capacidades asociadas al perfil del oferente.
+            </p>
+
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Habilidad</th>
+                        <th>Nivel</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="habilidad : ${habilidades}">
+                        <td th:text="${habilidad.caracteristica != null ? habilidad.caracteristica.nombre : 'Habilidad'}">Java</td>
+                        <td th:text="${habilidad.nivel}">4</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block" th:if="${habilidades == null or #lists.isEmpty(habilidades)}">
+        <div class="content-card">
+            <h2 class="section-title">Habilidades registradas</h2>
+            <p class="section-subtitle">
+                Esta sección mostrará las habilidades del candidato cuando la información esté disponible en el flujo actual.
+            </p>
+
+            <div class="empty-state">
+                <p>No hay habilidades disponibles para mostrar en este momento.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block" th:if="${oferente == null}">
+        <div class="empty-state">
+            <p>No se pudo cargar la información del candidato.</p>
+            <div class="mt-2">
+                <a th:href="@{/empresa/mis-puestos-empresa}" class="btn btn-secondary">Volver</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

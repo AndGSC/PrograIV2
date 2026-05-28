@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Administrador - Reportes')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-admin :: navAdmin}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <div th:replace="~{fragmentos/page-header :: pageHeader('Reportes', 'Consulte el resumen general de la información administrativa disponible en la plataforma.')}"></div>
+
+    <section class="section-block">
+        <div class="grid-2-equal">
+
+            <div class="content-card">
+                <h2 class="section-title">Resumen general</h2>
+                <p class="section-subtitle">
+                    Indicadores principales del estado actual del sistema.
+                </p>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>Total de empresas</h3>
+                        <p th:text="${totalEmpresas != null ? totalEmpresas : 0}">0</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Total de oferentes</h3>
+                        <p th:text="${totalOferentes != null ? totalOferentes : 0}">0</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Total de características</h3>
+                        <p th:text="${totalCaracteristicas != null ? totalCaracteristicas : 0}">0</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Total de puestos</h3>
+                        <p th:text="${totalPuestos != null ? totalPuestos : 0}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Accesos rápidos</h2>
+                <p class="section-subtitle">
+                    Navegue a las secciones administrativas más consultadas.
+                </p>
+
+                <div class="quick-links">
+                    <a th:href="@{/administrador/dashboard-admin}" class="btn btn-secondary">Volver al dashboard</a>
+                    <a th:href="@{/administrador/empresas-pendientes-admin}" class="btn btn-primary">Ver empresas pendientes</a>
+                    <a th:href="@{/administrador/oferentes-pendientes-admin}" class="btn btn-primary">Ver oferentes pendientes</a>
+                    <a th:href="@{/administrador/caracteristicas-admin}" class="btn btn-secondary">Gestionar características</a>
+                </div>
+
+                <div class="mt-3 cv-box">
+                    <p class="cv-status">
+                        Esta sección presenta el consolidado administrativo actualmente disponible en el sistema.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="grid-2-equal">
+
+            <div class="content-card">
+                <h2 class="section-title">Estado de empresas</h2>
+                <p class="section-subtitle">
+                    Distribución de registros empresariales según su condición actual.
+                </p>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Indicador</th>
+                            <th>Cantidad</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Total registradas</td>
+                            <td th:text="${totalEmpresas != null ? totalEmpresas : 0}">0</td>
+                        </tr>
+                        <tr>
+                            <td>Aprobadas</td>
+                            <td th:text="${empresasAprobadas != null ? empresasAprobadas : 0}">0</td>
+                        </tr>
+                        <tr>
+                            <td>Pendientes</td>
+                            <td th:text="${empresasPendientes != null ? empresasPendientes : 0}">0</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Estado de oferentes</h2>
+                <p class="section-subtitle">
+                    Distribución de registros de candidatos según su condición actual.
+                </p>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Indicador</th>
+                            <th>Cantidad</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Total registrados</td>
+                            <td th:text="${totalOferentes != null ? totalOferentes : 0}">0</td>
+                        </tr>
+                        <tr>
+                            <td>Aprobados</td>
+                            <td th:text="${oferentesAprobados != null ? oferentesAprobados : 0}">0</td>
+                        </tr>
+                        <tr>
+                            <td>Pendientes</td>
+                            <td th:text="${oferentesPendientes != null ? oferentesPendientes : 0}">0</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="content-card">
+            <h2 class="section-title">Resumen operativo</h2>
+            <p class="section-subtitle">
+                Vista consolidada de los elementos principales administrados por la plataforma.
+            </p>
+
+            <div class="detail-list">
+                <div class="detail-item">
+                    <span class="detail-label">Empresas registradas:</span>
+                    <span class="detail-value" th:text="${totalEmpresas != null ? totalEmpresas : 0}">0</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Oferentes registrados:</span>
+                    <span class="detail-value" th:text="${totalOferentes != null ? totalOferentes : 0}">0</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Características disponibles:</span>
+                    <span class="detail-value" th:text="${totalCaracteristicas != null ? totalCaracteristicas : 0}">0</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Puestos registrados:</span>
+                    <span class="detail-value" th:text="${totalPuestos != null ? totalPuestos : 0}">0</span>
+                    <div class="detail-item">
+                        <span class="detail-label">Empresas pendientes:</span>
+                        <span class="detail-value" th:text="${totalEmpresas - empresasAprobadas}">0</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Oferentes pendientes:</span>
+                        <span class="detail-value" th:text="${totalOferentes - oferentesAprobados}">0</span>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <div class="quick-links">
+                        <a th:href="@{/administrador/dashboard-admin}" class="btn btn-secondary">Volver al dashboard</a>
+                        <a th:href="@{/administrador/empresas-pendientes-admin}" class="btn btn-primary">Ver empresas pendientes</a>
+                        <a th:href="@{/administrador/oferentes-pendientes-admin}" class="btn btn-primary">Ver oferentes pendientes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="content-card">
+            <h2 class="section-title">Reporte mensual de puestos solicitados</h2>
+            <p class="section-subtitle">
+                Seleccione el periodo y genere un PDF con el detalle de puestos solicitados en ese mes.
+            </p>
+
+            <div class="grid-2-equal">
+                <div class="cv-box">
+                    <h3 class="card-title">Generar reporte</h3>
+                    <form th:action="@{/administrador/reportes-admin/puestos-mensual.pdf}" method="get" target="_blank">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="mes">Mes</label>
+                                <input id="mes"
+                                       name="mes"
+                                       type="number"
+                                       min="1"
+                                       max="12"
+                                       th:value="${mesActual}"
+                                       required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="anio">Anio</label>
+                                <input id="anio"
+                                       name="anio"
+                                       type="number"
+                                       min="2000"
+                                       max="2100"
+                                       th:value="${anioActual}"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Generar PDF</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="cv-box">
+                    <h3 class="card-title">Contenido del reporte</h3>
+                    <p class="cv-status">
+                        El PDF incluye resumen del periodo, total de puestos, activos/inactivos y detalle por puesto.
+                    </p>
+                    <p class="file-help">
+                        El archivo se descarga automaticamente en una nueva pestana para no perder la vista actual.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

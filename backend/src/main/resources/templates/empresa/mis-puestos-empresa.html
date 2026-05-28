@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Empresa - Mis puestos')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-empresa :: navEmpresa}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <section class="section-block">
+        <div class="content-card">
+            <h1 class="section-title">Mis puestos</h1>
+
+            <div class="form-actions mb-3">
+                <a th:href="@{/empresa/publicar-puesto}" class="btn btn-primary">
+                    Publicar puesto
+                </a>
+            </div>
+
+            <div class="table-wrapper" th:if="${puestos != null and !#lists.isEmpty(puestos)}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Descripción</th>
+                        <th>Salario</th>
+                        <th>Activo</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="puesto : ${puestos}">
+                        <td th:text="${puesto.id}">2</td>
+
+                        <td th:text="${puesto.descripcionGeneral}">Full Stack Developer</td>
+
+                        <td th:text="${puesto.salarioUsd != null ? puesto.salarioUsd : 0}">2000.0</td>
+
+                        <td>
+                            <span th:if="${puesto.activo == true}" class="badge badge-success">Sí</span>
+                            <span th:if="${puesto.activo == false}" class="badge badge-danger">No</span>
+                            <span th:if="${puesto.activo == null}" class="badge badge-neutral">N/D</span>
+                        </td>
+
+                        <td>
+                            <div class="table-actions">
+                                <form th:if="${puesto.activo == true}"
+                                      th:action="@{/empresa/desactivar-puesto/{idPuesto}(idPuesto=${puesto.id})}"
+                                      method="post"
+                                      style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        Desactivar
+                                    </button>
+                                </form>
+                                <a th:if="${puesto.activo == true}"
+                                   class="btn btn-primary btn-sm"
+                                   th:href="@{/empresa/candidatos/buscar(puestoId=${puesto.id})}">
+                                    Buscar candidatos
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" th:if="${puestos == null or #lists.isEmpty(puestos)}">
+                <p>No tiene puestos registrados.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

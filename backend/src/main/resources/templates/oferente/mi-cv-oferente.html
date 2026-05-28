@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Oferente - Mi CV')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-oferente :: navOferente}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <div th:replace="~{fragmentos/page-header :: pageHeader('Mi CV', 'Consulte el estado de su currículum y gestione el archivo registrado en el sistema.')}"></div>
+
+    <section class="section-block" th:if="${oferente != null}">
+        <div class="grid-2-equal">
+            <div class="content-card">
+                <h2 class="section-title">Información del oferente</h2>
+                <p class="section-subtitle">
+                    Datos generales asociados a su perfil profesional.
+                </p>
+
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Nombre completo:</span>
+                        <span class="detail-value">
+                            <span th:text="${oferente.nombre}">Juan</span>
+                            <span th:text="${oferente.apellido}">Pérez</span>
+                        </span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Identificación:</span>
+                        <span class="detail-value" th:text="${oferente.identificacion}">123456789</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Correo:</span>
+                        <span class="detail-value" th:text="${oferente.usuarios.correo}">correo@ejemplo.com</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Nacionalidad:</span>
+                        <span class="detail-value" th:text="${oferente.nacionalidad}">Costa Rica</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Residencia:</span>
+                        <span class="detail-value" th:text="${oferente.residencia}">Heredia</span>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <div class="quick-links">
+                        <a th:href="@{/oferente/dashboard-oferente}" class="btn btn-secondary">Volver al dashboard</a>
+                        <a th:href="@{/oferente/mis-habilidades-oferente}" class="btn btn-primary">Ver mis habilidades</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Estado del currículum</h2>
+                <p class="section-subtitle">
+                    Resumen del documento registrado actualmente en su cuenta.
+                </p>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>CV cargado</h3>
+                        <p th:if="${oferente.curriculumPdf != null}">Sí</p>
+                        <p th:if="${oferente.curriculumPdf == null}">No</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Formato esperado</h3>
+                        <p>PDF</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Perfil</h3>
+                        <p>Oferente</p>
+                    </div>
+                </div>
+
+                <div class="mt-3 cv-box">
+                    <p class="cv-status" th:if="${tieneCv}">
+                        Ya tiene un curriculum cargado en el sistema.
+                    <p class="cv-status" th:if="${oferente.curriculumPdf != null}">
+                        Su currículum ya se encuentra registrado en el sistema.
+                    </p>
+
+                    <p class="cv-status" th:if="${oferente.curriculumPdf == null}">
+                        Aún no ha registrado un currículum en su perfil.
+                    <p class="cv-status" th:if="${!tieneCv}">
+                        Aun no ha cargado un curriculum.
+                    </p>
+
+                    <p class="file-help">
+                        Utilice esta sección para mantener actualizado su documento profesional.
+                    </p>
+                </div>
+
+                <div class="mt-3" th:if="${tieneCv}">
+                    <div style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #fff;">
+                        <iframe
+                                th:src="@{${urlPreviewCv}}"
+                                title="Vista previa del CV"
+                                style="width: 100%; height: 340px; border: 0;"
+                        ></iframe>
+                    </div>
+
+                    <div class="quick-links mt-2">
+                        <a th:href="@{${urlPreviewCv}}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Abrir vista completa</a>
+                        <a th:href="@{${urlDescargaCv}}" class="btn btn-secondary" target="_blank">Descargar CV</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block" th:if="${oferente != null}">
+        <div class="content-card form-card">
+            <h2 class="section-title">Subir curriculum</h2>
+            <p class="section-subtitle">
+                Seleccione un archivo PDF para registrarlo en el sistema.
+            </p>
+
+            <form th:action="@{/oferente/subir-curriculum}" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="curriculum">Archivo PDF</label>
+                    <input type="file"
+                           id="curriculum"
+                           name="curriculum"
+                           accept="application/pdf"
+                           required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Subir currículum</button>
+                    <a th:href="@{/oferente/dashboard-oferente}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+
+            <div class="mt-3 cv-box">
+                <h3 class="card-title">Recomendaciones</h3>
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Formato sugerido:</span>
+                        <span class="detail-value">Archivo PDF legible y actualizado.</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Contenido recomendado:</span>
+                        <span class="detail-value">Experiencia, formación, habilidades y datos de contacto.</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Actualización:</span>
+                        <span class="detail-value">Mantenga este documento al día para mejorar la presentación de su perfil.</span>
+                    </div>
+                </div>
+                <h3 class="card-title">Importante</h3>
+                <p class="cv-status">
+                    Solo se permite formato PDF y un tamano maximo de 10 MB. Si ya existe un CV, se reemplaza con el nuevo archivo.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block" th:if="${oferente == null}">
+        <div class="empty-state">
+            <p>No se pudo cargar la información del oferente.</p>
+            <div class="mt-2">
+                <a th:href="@{/oferente/dashboard-oferente}" class="btn btn-secondary">Volver al dashboard</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

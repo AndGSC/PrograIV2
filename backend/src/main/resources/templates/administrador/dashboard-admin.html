@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Administrador - Dashboard')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-admin :: navAdmin}"></div>
+
+<main class="page-container">
+  <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+  <div th:replace="~{fragmentos/page-header :: pageHeader('Dashboard administrador', 'Panel principal de administracion del sistema')}"></div>
+
+  <section class="section-block">
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <h3>Total usuarios</h3>
+        <p th:text="${totalUsuarios}">0</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Empresas pendientes</h3>
+        <p th:text="${empresasPendientes}">0</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Oferentes pendientes</h3>
+        <p th:text="${oferentesPendientes}">0</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block">
+    <div class="grid-2-equal">
+      <div class="content-card">
+        <h2 class="section-title">Acciones rapidas</h2>
+        <p class="section-subtitle">
+          Acceda a las opciones principales del panel administrativo.
+        </p>
+
+        <div class="quick-links">
+          <a th:href="@{/administrador/empresas-pendientes-admin}" class="btn btn-primary">
+            Empresas pendientes
+          </a>
+
+          <a th:href="@{/administrador/oferentes-pendientes-admin}" class="btn btn-primary">
+            Oferentes pendientes
+          </a>
+
+          <a th:href="@{/administrador/caracteristicas-admin}" class="btn btn-secondary">
+            Caracteristicas
+          </a>
+
+          <a th:href="@{/administrador/reportes-admin}" class="btn btn-secondary">
+            Reportes
+          </a>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <h2 class="section-title">Resumen administrativo</h2>
+
+        <div class="detail-list">
+          <div class="detail-item">
+            <span class="detail-label">Usuarios registrados:</span>
+            <span class="detail-value" th:text="${totalUsuarios}">0</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Empresas por revisar:</span>
+            <span class="detail-value" th:text="${empresasPendientes}">0</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Oferentes por revisar:</span>
+            <span class="detail-value" th:text="${oferentesPendientes}">0</span>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <p class="text-muted mb-0">
+            Desde este panel puede aprobar registros, administrar caracteristicas y revisar reportes.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block">
+    <div class="content-card">
+      <h2 class="section-title">Estado del sistema</h2>
+
+      <div class="grid-3">
+        <div class="detail-card text-center">
+          <span class="badge badge-info">Usuarios</span>
+          <p class="mt-2 mb-0">
+            Total actual:
+            <strong th:text="${totalUsuarios}">0</strong>
+          </p>
+        </div>
+
+        <div class="detail-card text-center">
+          <span class="badge badge-warning">Empresas</span>
+          <p class="mt-2 mb-0">
+            Pendientes:
+            <strong th:text="${empresasPendientes}">0</strong>
+          </p>
+        </div>
+
+        <div class="detail-card text-center">
+          <span class="badge badge-warning">Oferentes</span>
+          <p class="mt-2 mb-0">
+            Pendientes:
+            <strong th:text="${oferentesPendientes}">0</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

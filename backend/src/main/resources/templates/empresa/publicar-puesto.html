@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Empresa - Publicar puesto')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-empresa :: navEmpresa}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <section class="section-block">
+        <div class="content-card">
+            <h1 class="section-title">Publicar nuevo puesto</h1>
+
+            <form th:action="@{/empresa/crear-puesto}" method="post">
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción del puesto</label>
+                    <textarea id="descripcion" name="descripcion" class="form-control" rows="4" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="salario">Salario (USD)</label>
+                    <input type="number" id="salario" name="salario" class="form-control" step="0.01" min="0" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo">Tipo de publicación</label>
+                    <select id="tipo" name="tipo" class="form-control">
+                        <option value="PUBLICA">Pública</option>
+                        <option value="PRIVADA">Privada</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Características requeridas</label>
+                    <p class="text-muted" style="font-size:0.9em; margin-bottom:1rem;">Seleccione las habilidades requeridas e indique el nivel mínimo (1 = básico, 5 = experto).</p>
+
+                    <div th:if="${categorias == null or #lists.isEmpty(categorias)}" class="empty-state">
+                        <p>No hay características registradas.</p>
+                    </div>
+
+                    <div class="caract-grid">
+                        <div th:each="categoria : ${categorias}" class="caract-categoria">
+                            <div class="caract-categoria-header">
+                                <span th:text="${categoria.nombre}">Categoría</span>
+                            </div>
+
+                            <div class="caract-hijos">
+                                <div th:if="${categoria.caracteristicas == null or #sets.isEmpty(categoria.caracteristicas)}" class="empty-state">
+                                    <p>Esta categoria no tiene subcaracteristicas seleccionables.</p>
+                                </div>
+
+                                <div th:each="hijo : ${categoria.caracteristicas}" class="caract-item">
+                                    <label class="caract-label">
+                                        <input type="checkbox"
+                                               name="idCaracteristicas"
+                                               th:value="${hijo.id}"
+                                               th:id="'caract_' + ${hijo.id}"
+                                               class="caract-check"
+                                               th:attr="data-nivel-id='nivel_' + ${hijo.id}" />
+                                        <span th:text="${hijo.nombre}">Habilidad</span>
+                                    </label>
+                                    <label class="caract-label" style="display:none;">
+                                        Nivel requerido
+                                        <select th:name="'nivel_' + ${hijo.id}"
+                                                th:id="'nivel_' + ${hijo.id}"
+                                                class="nivel-select"
+                                                style="display:none;">
+                                            <option value="1">1 - Básico</option>
+                                            <option value="2">2 - Elemental</option>
+                                            <option value="3">3 - Intermedio</option>
+                                            <option value="4">4 - Avanzado</option>
+                                            <option value="5">5 - Experto</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Publicar puesto</button>
+                    <a th:href="@{/empresa/mis-puestos-empresa}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+<script>
+    document.querySelectorAll('.caract-check').forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            var nivelId = this.getAttribute('data-nivel-id');
+            var nivelSelect = document.getElementById(nivelId);
+            if (nivelSelect) {
+                nivelSelect.style.display = this.checked ? 'inline-block' : 'none';
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

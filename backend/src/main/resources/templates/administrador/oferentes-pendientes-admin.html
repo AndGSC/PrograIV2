@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Administrador - Oferentes pendientes')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-admin :: navAdmin}"></div>
+
+<main class="page-container">
+  <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+  <div th:replace="~{fragmentos/page-header :: pageHeader('Oferentes pendientes', 'Revision y aprobacion de nuevos registros de oferentes')}"></div>
+
+  <section class="section-block">
+    <div class="content-card">
+      <div class="search-results-header">
+        <h2 class="section-title mb-0">Solicitudes pendientes</h2>
+        <div class="actions-row">
+          <a th:href="@{/administrador/dashboard-admin}" class="btn btn-secondary">Volver al dashboard</a>
+        </div>
+      </div>
+
+      <div class="table-wrapper" th:if="${oferentes != null and !#lists.isEmpty(oferentes)}">
+        <table>
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>Identificacion</th>
+            <th>Nombre completo</th>
+            <th>Correo</th>
+            <th>Nacionalidad</th>
+            <th>Telefono</th>
+            <th>Residencia</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="oferente : ${oferentes}">
+            <td th:text="${oferente.id}">1</td>
+
+            <td th:text="${oferente.identificacion != null ? oferente.identificacion : 'No registrada'}">
+              123456789
+            </td>
+
+            <td>
+              <span th:text="${oferente.nombre != null ? oferente.nombre : 'Sin nombre'}">Juan</span>
+              <span th:text="${oferente.apellido != null ? oferente.apellido : ''}">Perez</span>
+            </td>
+
+            <td th:text="${oferente.usuarios != null ? oferente.usuarios.correo : 'No registrado'}">
+              correo@ejemplo.com
+            </td>
+
+            <td th:text="${oferente.nacionalidad != null ? oferente.nacionalidad : 'No registrada'}">
+              Costarricense
+            </td>
+
+            <td th:text="${oferente.telefono != null ? oferente.telefono : 'No registrado'}">
+              88887777
+            </td>
+
+            <td th:text="${oferente.residencia != null ? oferente.residencia : 'No registrada'}">
+              Heredia
+            </td>
+
+            <td>
+              <span class="badge badge-warning">PENDIENTE</span>
+            </td>
+
+            <td>
+              <div class="table-actions">
+                <form th:action="@{/administrador/aprobar-oferente}" method="post">
+                  <input type="hidden" name="id" th:value="${oferente.id}">
+                  <button type="submit" class="btn btn-success btn-sm">Aprobar</button>
+                </form>
+
+                <form th:action="@{/administrador/rechazar-oferente}" method="post">
+                  <input type="hidden" name="id" th:value="${oferente.id}">
+                  <button type="submit" class="btn btn-danger btn-sm">Rechazar</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" th:if="${oferentes == null or #lists.isEmpty(oferentes)}">
+        <p>No hay oferentes pendientes de aprobacion en este momento.</p>
+        <div class="mt-2">
+          <a th:href="@{/administrador/dashboard-admin}" class="btn btn-secondary">Volver al dashboard</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Administrador - Empresas pendientes')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-admin :: navAdmin}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <div th:replace="~{fragmentos/page-header :: pageHeader('Empresas pendientes', 'Revision y aprobacion de nuevos registros de empresa')}"></div>
+
+    <section class="section-block">
+        <div class="content-card">
+            <div class="search-results-header">
+                <h2 class="section-title mb-0">Solicitudes pendientes</h2>
+                <div class="actions-row">
+                    <a th:href="@{/administrador/dashboard-admin}" class="btn btn-secondary">Volver al dashboard</a>
+                </div>
+            </div>
+
+            <div class="table-wrapper" th:if="${empresas != null and !#lists.isEmpty(empresas)}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Localizacion</th>
+                        <th>Telefono</th>
+                        <th>Descripcion</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="empresa : ${empresas}">
+                        <td th:text="${empresa.id}">1</td>
+
+                        <td th:text="${empresa.nombre}">Empresa Demo</td>
+
+                        <td th:text="${empresa.usuarios.correo}">empresa@correo.com</td>
+
+                        <td th:text="${empresa.localizacion != null ? empresa.localizacion : 'No registrada'}">
+                            San Jose
+                        </td>
+
+                        <td th:text="${empresa.telefono != null ? empresa.telefono : 'No registrado'}">
+                            22223333
+                        </td>
+
+                        <td th:text="${empresa.descripcion != null ? empresa.descripcion : 'Sin descripcion'}">
+                            Descripcion de la empresa
+                        </td>
+
+                        <td>
+                            <span class="badge badge-warning">PENDIENTE</span>
+                        </td>
+
+                        <td>
+                            <div class="table-actions">
+                                <form th:action="@{/administrador/aprobar-empresa}" method="post">
+                                    <input type="hidden" name="id" th:value="${empresa.id}">
+                                    <button type="submit" class="btn btn-success btn-sm">Aprobar</button>
+                                </form>
+
+                                <form th:action="@{/administrador/rechazar-empresa}" method="post">
+                                    <input type="hidden" name="id" th:value="${empresa.id}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Rechazar</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" th:if="${empresas == null or #lists.isEmpty(empresas)}">
+                <p>No hay empresas pendientes de aprobacion en este momento.</p>
+                <div class="mt-2">
+                    <a th:href="@{/administrador/dashboard-admin}" class="btn btn-secondary">Volver al dashboard</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

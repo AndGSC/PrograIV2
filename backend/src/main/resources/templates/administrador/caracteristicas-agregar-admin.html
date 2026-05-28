@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Administrador - Agregar característica')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-admin :: navAdmin}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <div th:replace="~{fragmentos/page-header :: pageHeader('Agregar característica', 'Registre una nueva categoría o subcategoría dentro del catálogo del sistema.')}"></div>
+
+    <section class="section-block">
+        <div class="feature-layout">
+
+            <div class="content-card">
+                <h2 class="section-title">Formulario de registro</h2>
+                <p class="section-subtitle">
+                    Utilice este formulario para agregar una característica principal o una subcategoría asociada a una existente.
+                </p>
+
+                <form th:action="@{/administrador/crear-caracteristica}" method="post">
+                    <div class="form-group">
+                        <label for="nombre">Nombre de la característica</label>
+                        <input type="text"
+                               id="nombre"
+                               name="nombre"
+                               placeholder="Ejemplo: Java, HTML, Bases de datos"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="idPadre">Categoría padre</label>
+                        <select id="idPadre" name="idPadre">
+                            <option value="">Crear como categoría principal</option>
+                            <option th:each="caracteristica : ${caracteristicas}"
+                                    th:value="${caracteristica.id}"
+                                    th:text="${caracteristica.nombre}">
+                                Característica
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar característica</button>
+                        <a th:href="@{/administrador/caracteristicas-admin}" class="btn btn-secondary">Volver al catálogo</a>
+                    </div>
+                </form>
+
+                <div class="mt-3 cv-box">
+                    <h3 class="card-title">Indicaciones</h3>
+                    <div class="detail-list">
+                        <div class="detail-item">
+                            <span class="detail-label">Sin categoría padre:</span>
+                            <span class="detail-value">La característica se registrará como principal.</span>
+                        </div>
+
+                        <div class="detail-item">
+                            <span class="detail-label">Con categoría padre:</span>
+                            <span class="detail-value">La característica se registrará como subcategoría.</span>
+                        </div>
+
+                        <div class="detail-item">
+                            <span class="detail-label">Uso del catálogo:</span>
+                            <span class="detail-value">Estas categorías podrán utilizarse en puestos y habilidades del sistema.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Catálogo actual</h2>
+                <p class="section-subtitle">
+                    Vista general de las categorías disponibles en la plataforma.
+                </p>
+
+                <ul class="feature-tree" th:if="${principales != null and !#lists.isEmpty(principales)}">
+                    <li th:each="principal : ${principales}">
+                        <span class="feature-name" th:text="${principal.nombre}">Lenguajes de programación</span>
+
+                        <ul th:if="${principal.caracteristicas != null and !#sets.isEmpty(principal.caracteristicas)}">
+                            <li th:each="hija : ${principal.caracteristicas}">
+                                <span th:text="${hija.nombre}">Java</span>
+
+                                <ul th:if="${hija.caracteristicas != null and !#sets.isEmpty(hija.caracteristicas)}">
+                                    <li th:each="nieta : ${hija.caracteristicas}">
+                                        <span th:text="${nieta.nombre}">Spring Boot</span>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="empty-state" th:if="${principales == null or #lists.isEmpty(principales)}">
+                    <p>No hay características registradas en este momento.</p>
+                </div>
+
+                <div class="mt-3">
+                    <h3 class="card-title">Resumen</h3>
+                    <div class="detail-list">
+                        <div class="detail-item">
+                            <span class="detail-label">Total disponible:</span>
+                            <span class="detail-value" th:text="${caracteristicas != null ? #lists.size(caracteristicas) : 0}">0</span>
+                        </div>
+
+                        <div class="detail-item">
+                            <span class="detail-label">Categorías principales:</span>
+                            <span class="detail-value" th:text="${principales != null ? #lists.size(principales) : 0}">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

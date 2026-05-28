@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Buscar puestos')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-publica :: navPublica}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <section class="section-block">
+        <div class="content-card form-card">
+            <h1 class="page-title">Buscar puestos</h1>
+            <p class="page-subtitle">
+                Filtre por descripcion, tipo de publicacion o rango salarial.
+            </p>
+
+            <form th:action="@{/puestos}" method="get" class="mt-3">
+                <div class="form-group">
+                    <label for="busqueda">Descripcion del puesto</label>
+                    <input type="text"
+                           id="busqueda"
+                           name="busqueda"
+                           placeholder="Ejemplo: Java, analista, soporte"
+                           th:value="${param.busqueda != null ? param.busqueda[0] : ''}">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo">Tipo de publicacion</label>
+                    <select id="tipo" name="tipo">
+                        <option value="">Todos</option>
+                        <option value="PUBLICA"
+                                th:selected="${param.tipo != null and param.tipo[0] == 'PUBLICA'}">
+                            PUBLICA
+                        </option>
+                        <option value="PRIVADA" th:if="${autenticado}"
+                                th:selected="${param.tipo != null and param.tipo[0] == 'PRIVADA'}">
+                            PRIVADA
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="salarioMin">Salario minimo</label>
+                        <input type="number"
+                               id="salarioMin"
+                               name="salarioMin"
+                               step="0.01"
+                               min="0"
+                               placeholder="0.00"
+                               th:value="${param.salarioMin != null ? param.salarioMin[0] : ''}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="salarioMax">Salario maximo</label>
+                        <input type="number"
+                               id="salarioMax"
+                               name="salarioMax"
+                               step="0.01"
+                               min="0"
+                               placeholder="0.00"
+                               th:value="${param.salarioMax != null ? param.salarioMax[0] : ''}">
+                    </div>
+                </div>
+
+                <div class="form-group" th:if="${categorias != null and !#lists.isEmpty(categorias)}">
+                    <label>Filtrar por características requeridas</label>
+                    <p class="text-muted" style="font-size:0.88em; margin-bottom:0.75rem;">Solo se mostrarán puestos que requieran <strong>todas</strong> las características seleccionadas.</p>
+                    <div class="caract-grid">
+                        <div th:each="categoria : ${categorias}" class="caract-categoria">
+                            <div class="caract-categoria-header" th:text="${categoria.nombre}">Categoría</div>
+                            <div class="caract-hijos">
+                                <!-- Categoria padre siempre seleccionable -->
+                                <div class="caract-item">
+                                    <label class="caract-label">
+                                        <input type="checkbox"
+                                               name="caracteristicas"
+                                               th:value="${categoria.id}"
+                                               th:checked="${caracteristicasSeleccionadas != null and #lists.contains(caracteristicasSeleccionadas, categoria.id)}" />
+                                        <span th:text="${categoria.nombre}">Categoría</span>
+                                    </label>
+                                </div>
+                                <!-- Hijos si los tiene -->
+                                <div th:each="hijo : ${categoria.caracteristicas}" class="caract-item">
+                                    <label class="caract-label">
+                                        <input type="checkbox"
+                                               name="caracteristicas"
+                                               th:value="${hijo.id}"
+                                               th:checked="${caracteristicasSeleccionadas != null and #lists.contains(caracteristicasSeleccionadas, hijo.id)}" />
+                                        <span th:text="${hijo.nombre}">Habilidad</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                    <a th:href="@{/puestos}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="empty-state" th:if="${errorAcceso != null}">
+            <p th:text="${errorAcceso}"></p>
+            <a th:href="@{/login}" class="btn btn-primary mt-2">Iniciar sesión</a>
+        </div>
+
+        <div class="search-results-header" th:if="${errorAcceso == null and puestos != null and !#lists.isEmpty(puestos)}">
+            <h2 class="section-title mb-0">Resultados</h2>
+            <span class="badge badge-neutral"
+                  th:text="${#lists.size(puestos)} + ' puesto(s)'">
+                0 puesto(s)
+            </span>
+        </div>
+
+        <div class="company-grid" th:if="${errorAcceso == null and puestos != null and !#lists.isEmpty(puestos)}">
+            <article class="company-card" th:each="puesto : ${puestos}">
+                <p class="company-meta" th:text="${puesto.idEmpresa.nombre}">Empresa XYZ</p>
+
+                <h3 class="company-name" th:text="${puesto.descripcionGeneral}">
+                    Frontend Developer
+                </h3>
+
+                <p class="job-salary mb-1">
+                    Salario:
+                    $<span th:text="${#numbers.formatDecimal(puesto.salarioUsd, 1, 'COMMA', 2, 'POINT')}">1200.00</span>
+                </p>
+                <p class="job-salary mb-1"
+                   th:if="${salariosColonesPorId != null and salariosColonesPorId[puesto.id] != null}">
+                    Equivalente:
+                    ₡<span th:text="${#numbers.formatDecimal(salariosColonesPorId[puesto.id], 1, 'COMMA', 2, 'POINT')}">660000.00</span>
+                </p>
+                <p class="text-muted mb-2">
+                    Tipo:
+                    <span th:text="${puesto.tipoPublicacion}">PUBLICO</span>
+                </p>
+
+                <a class="btn btn-secondary btn-sm"
+                   th:href="@{/puesto/{id}(id=${puesto.id})}">
+                    Ver detalle
+                </a>
+            </article>
+        </div>
+
+        <div class="empty-state" th:if="${errorAcceso == null and (puestos == null or #lists.isEmpty(puestos))}">
+            <p>No se encontraron puestos para los criterios indicados.</p>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

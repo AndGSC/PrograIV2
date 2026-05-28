@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Registro oferente')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-publica :: navPublica}"></div>
+
+<main class="page-container">
+    <div class="form-wrapper">
+        <div class="content-card form-card">
+            <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+            <div th:replace="~{fragmentos/page-header :: pageHeader('Registro oferente', 'Complete sus datos para solicitar el registro en el sistema')}"></div>
+
+            <form th:action="@{/registro-oferentes}" th:object="${oferente}" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="identificacion">Identificación</label>
+                        <input type="text"
+                               id="identificacion"
+                               th:field="*{identificacion}"
+                               placeholder="Ejemplo: 123456789"
+                               inputmode="numeric"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefono">Teléfono</label>
+                        <input type="text"
+                               id="telefono"
+                               th:field="*{telefono}"
+                               placeholder="Ejemplo: 88887777"
+                               inputmode="numeric">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text"
+                               id="nombre"
+                               th:field="*{nombre}"
+                               placeholder="Ejemplo: Juan"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apellido">Primer apellido</label>
+                        <input type="text"
+                               id="apellido"
+                               th:field="*{apellido}"
+                               placeholder="Ejemplo: Pérez"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nacionalidad">Nacionalidad</label>
+                        <select id="nacionalidad" th:field="*{nacionalidad}" required>
+                            <option value="">Seleccione una nacionalidad</option>
+                            <option value="" disabled th:if="${#lists.isEmpty(nacionalidades)}">
+                                No hay nacionalidades disponibles
+                            </option>
+                            <option th:each="nac : ${nacionalidades}"
+                                    th:value="${nac.codigo}"
+                                    th:text="${nac.nombre}">
+                            </option>
+                        </select>
+
+                        <p class="file-help mt-1" th:if="${nacionalidades == null or #lists.isEmpty(nacionalidades)}">
+                            No hay nacionalidades disponibles en este momento.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="residencia">Lugar de residencia</label>
+                        <input type="text"
+                               id="residencia"
+                               th:field="*{residencia}"
+                               placeholder="Ejemplo: Heredia, Costa Rica">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email"
+                           id="email"
+                           th:field="*{email}"
+                           placeholder="correo@ejemplo.com"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="clave">Clave</label>
+                    <input type="password"
+                           id="clave"
+                           th:field="*{clave}"
+                           placeholder="Mínimo 6 caracteres"
+                           minlength="6"
+                           required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Registrar oferente</button>
+                    <a th:href="@{/login}" class="btn btn-secondary">Ir a login</a>
+                </div>
+            </form>
+
+            <div class="mt-3 cv-box">
+                <h3 class="card-title">Importante</h3>
+                <p class="cv-status">
+                    Después del registro, su cuenta debe ser aprobada por la administración antes de iniciar sesión.
+                </p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Empresa - Candidatos')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-empresa :: navEmpresa}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <section class="section-block">
+        <div class="content-card">
+            <h1 class="section-title">Candidatos para el puesto</h1>
+
+            <p class="section-subtitle mb-3" th:if="${puestoSeleccionado != null}">
+                <strong>Puesto:</strong>
+                <span th:text="${puestoSeleccionado.descripcionGeneral}">Full Stack Developer</span>
+            </p>
+
+            <div class="table-wrapper" th:if="${candidatos != null and !#lists.isEmpty(candidatos)}">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Oferente</th>
+                        <th>Requisitos cumplidos</th>
+                        <th>% Coincidencia</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="candidato : ${candidatos}">
+                        <td th:text="${candidato.nombreOferente}">Jose Sanchez</td>
+                        <td th:text="${candidato.requisitosCumplidosTexto}">1 / 1</td>
+                        <td th:text="${candidato.porcentajeCoincidenciaTexto}">100,00%</td>
+                        <td>
+                            <a class="btn btn-secondary btn-sm"
+                               th:href="@{/empresa/ver-detalles-candidato-empresa(id=${candidato.idOferente},idPuesto=${idPuesto})}">
+                                Ver detalle
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" th:if="${candidatos == null or #lists.isEmpty(candidatos)}">
+                <p>No se encontraron candidatos que cumplan con los requisitos del puesto.</p>
+            </div>
+
+            <div class="form-actions mt-3">
+                <a th:href="@{/empresa/mis-puestos-empresa}" class="btn btn-secondary">Volver</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

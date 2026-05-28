@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Bolsa de Empleo - Inicio')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-publica :: navPublica}"></div>
+
+<style>
+    .job-detail-wrapper {
+        display: inline-block;
+    }
+
+    .job-detail-btn {
+        display: inline-block;
+        padding: 0.65rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 600;
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        transition: background 0.2s ease-in-out;
+        position: relative;
+        z-index: 2;
+    }
+
+    .job-detail-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .job-hover-detail {
+        position: absolute;
+        inset: 0;
+        background: rgba(31, 37, 45, 0.97);
+        color: #ffffff;
+        border-radius: 8px;
+        padding: 1rem;
+        z-index: 10;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        overflow-y: auto;
+    }
+
+    .job-card:hover .job-hover-detail,
+    .job-card:focus-within .job-hover-detail {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    .job-detail-wrapper:hover .job-hover-detail,
+    .job-detail-wrapper:focus-within .job-hover-detail,
+    .job-detail-wrapper .job-hover-detail:hover {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .job-hover-detail h4 {
+        margin: 0 0 0.75rem 0;
+        font-size: 1rem;
+        color: #ffffff;
+    }
+
+    .job-hover-detail p {
+        margin: 0 0 0.5rem 0;
+        line-height: 1.4;
+        color: #ffffff;
+    }
+
+    .job-hover-detail strong {
+        color: #ffffff;
+    }
+
+    .job-hover-detail .hover-actions {
+        margin-top: 0.75rem;
+    }
+
+    .job-hover-detail .hover-actions a {
+        display: inline-block;
+        padding: 0.55rem 0.9rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 600;
+        background: #111827;
+        color: #ffffff;
+    }
+</style>
+
+<main class="page-container">
+
+    <section class="section-block">
+        <div class="content-card">
+            <div th:replace="~{fragmentos/page-header :: pageHeader('Bolsa de Empleo', 'Encuentre oportunidades laborales, publique puestos y conecte talento con empresas.')}"></div>
+
+            <p class="section-subtitle mb-0">
+                Plataforma web para gestión de puestos.
+            </p>
+
+            <div class="quick-links mt-3">
+                <a th:href="@{/puestos}" class="btn btn-primary">Buscar puestos</a>
+                <a th:href="@{/registro-oferentes}" class="btn btn-secondary">Registrarme como oferente</a>
+                <a th:href="@{/registro-empresa}" class="btn btn-secondary">Registrar empresa</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="grid-3">
+
+            <div class="stat-card">
+                <h3>Puestos recientes</h3>
+                <p th:text="${puestosRecientes != null ? #lists.size(puestosRecientes) : 0}">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Empresas destacadas</h3>
+                <p th:text="${empresasDestacadas != null ? #lists.size(empresasDestacadas) : 0}">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Acceso</h3>
+                <p>Web</p>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="search-results-header">
+            <div>
+                <h2 class="section-title mb-1">Puestos recientes</h2>
+                <p class="section-subtitle mb-0">
+                    Consulte las oportunidades disponibles más recientes en la plataforma.
+                </p>
+            </div>
+
+            <a th:href="@{/puestos}" class="btn btn-primary">Ver todos los puestos</a>
+        </div>
+
+        <div class="jobs-grid" th:if="${puestosRecientes != null and !#lists.isEmpty(puestosRecientes)}">
+            <article class="job-card"
+                     th:each="puesto, iterStat : ${puestosRecientes}"
+                     th:if="${iterStat.index < 5}">
+                <div class="job-card-body">
+                    <h3 class="job-company"
+                        th:text="${puesto.idEmpresa != null ? puesto.idEmpresa.nombre : 'Empresa'}">
+                        Empresa
+                    </h3>
+
+                    <p class="job-position"
+                       th:text="${puesto.descripcionGeneral != null and #strings.length(puesto.descripcionGeneral) > 90 ? #strings.substring(puesto.descripcionGeneral, 0, 90) + '...' : puesto.descripcionGeneral}">
+                        Descripción del puesto
+                    </p>
+
+                    <p class="job-salary"
+                       th:text="${puesto.salarioUsd != null ? '$' + puesto.salarioUsd : 'Salario no disponible'}">
+                        $0
+                    </p>
+                    <p class="job-salary"
+                       style="font-size:0.9em;"
+                       th:if="${salariosColonesPorId != null and salariosColonesPorId[puesto.id] != null}">
+                        ₡<span th:text="${#numbers.formatDecimal(salariosColonesPorId[puesto.id], 1, 'COMMA', 2, 'POINT')}">0.00</span> CRC
+                    </p>
+
+                    <span class="badge badge-info job-type"
+                          th:text="${puesto.tipoPublicacion}">
+                        PUBLICA
+                    </span>
+
+                    <div class="job-detail-wrapper mt-2">
+                        <a th:href="@{/puesto/{id}(id=${puesto.id})}" class="job-detail-btn">
+                            Más información
+                        </a>
+
+                        <div class="job-hover-detail">
+                            <h4>Información básica</h4>
+
+                            <p>
+                                <strong>Empresa:</strong>
+                                <span th:text="${puesto.idEmpresa != null ? puesto.idEmpresa.nombre : 'Empresa no disponible'}">
+                                    Empresa
+                                </span>
+                            </p>
+
+                            <p>
+                                <strong>Descripción:</strong>
+                                <span th:text="${puesto.descripcionGeneral != null ? puesto.descripcionGeneral : 'No disponible'}">
+                                    Descripción
+                                </span>
+                            </p>
+
+                            <p>
+                                <strong>Salario (USD):</strong>
+                                <span th:text="${puesto.salarioUsd != null ? '$' + puesto.salarioUsd : 'No disponible'}">
+                                    $0
+                                </span>
+                            </p>
+
+                            <p th:if="${salariosColonesPorId != null and salariosColonesPorId[puesto.id] != null}">
+                                <strong>Salario (CRC):</strong>
+                                <span>
+                                    ₡<span th:text="${#numbers.formatDecimal(salariosColonesPorId[puesto.id], 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                </span>
+                            </p>
+
+                            <p>
+                                <strong>Tipo de publicación:</strong>
+                                <span th:text="${puesto.tipoPublicacion != null ? puesto.tipoPublicacion : 'No disponible'}">
+                                    PUBLICA
+                                </span>
+                            </p>
+
+                            <div class="hover-actions">
+                                <a th:href="@{/puesto/{id}(id=${puesto.id})}">
+                                    Ir al detalle completo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <div class="empty-state" th:if="${puestosRecientes == null or #lists.isEmpty(puestosRecientes)}">
+            <p>No hay puestos recientes disponibles.</p>
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="search-results-header">
+            <div>
+                <h2 class="section-title mb-1">Empresas destacadas</h2>
+                <p class="section-subtitle mb-0">
+                    Organizaciones registradas que participan actualmente en la plataforma.
+                </p>
+            </div>
+        </div>
+
+        <div class="company-grid" th:if="${empresasDestacadas != null and !#lists.isEmpty(empresasDestacadas)}">
+            <article class="company-card" th:each="empresa : ${empresasDestacadas}">
+                <h3 class="company-name" th:text="${empresa.nombre}">Empresa</h3>
+
+                <p class="company-meta">
+                    <strong>Ubicación:</strong>
+                    <span th:text="${empresa.localizacion != null ? empresa.localizacion : 'No especificada'}">
+                        No especificada
+                    </span>
+                </p>
+
+                <p class="company-meta">
+                    <strong>Descripción:</strong>
+                    <span th:text="${empresa.descripcion != null ? empresa.descripcion : 'Sin descripción disponible'}">
+                        Sin descripción disponible
+                    </span>
+                </p>
+            </article>
+        </div>
+
+        <div class="empty-state" th:if="${empresasDestacadas == null or #lists.isEmpty(empresasDestacadas)}">
+            <p>No hay empresas destacadas disponibles.</p>
+        </div>
+    </section>
+
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

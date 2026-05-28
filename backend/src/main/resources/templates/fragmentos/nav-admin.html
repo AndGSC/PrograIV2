@@ -1,0 +1,27 @@
+<header th:fragment="navAdmin" class="main-header">
+  <nav class="nav-container">
+    <div class="nav-left">
+      <a th:href="@{/}" class="logo-link">
+        <img th:src="@{/assets/logo-empresa.png}" alt="Logo BolsaEmpleo" class="logo-img">
+        <span class="logo-text">BolsaEmpleo</span>
+      </a>
+
+      <ul class="nav-menu">
+        <li><a th:href="@{/administrador/dashboard-admin}">Dashboard</a></li>
+        <li><a th:href="@{/administrador/empresas-pendientes-admin}">Empresas pendientes</a></li>
+        <li><a th:href="@{/administrador/oferentes-pendientes-admin}">Oferentes pendientes</a></li>
+        <li><a th:href="@{/administrador/caracteristicas-admin}">Características</a></li>
+        <li><a th:href="@{/administrador/reportes-admin}">Reportes</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-right nav-user-box">
+            <span class="nav-user-email"
+                  th:if="${session.usuario != null}"
+                  th:text="${session.usuario.correo}">
+                admin@correo.com
+            </span>
+      <a th:href="@{/salir}" class="btn btn-outline-light btn-sm">Salir</a>
+    </div>
+  </nav>
+</header>

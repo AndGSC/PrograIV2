@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Oferente - Dashboard')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-oferente :: navOferente}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <div th:replace="~{fragmentos/page-header :: pageHeader('Dashboard oferente', 'Panel principal del oferente')}"></div>
+
+    <section class="section-block" th:if="${oferente != null}">
+        <div class="grid-2-equal">
+            <div class="content-card">
+                <h2 class="section-title">Informacion personal</h2>
+
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Nombre:</span>
+                        <span class="detail-value" th:text="${nombre}">Juan Perez</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Identificacion:</span>
+                        <span class="detail-value" th:text="${oferente.identificacion}">123456789</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Correo:</span>
+                        <span class="detail-value" th:text="${oferente.usuarios.correo}">correo@ejemplo.com</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Telefono:</span>
+                        <span class="detail-value" th:text="${oferente.telefono}">88887777</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Nacionalidad:</span>
+                        <span class="detail-value" th:text="${oferente.nacionalidad}">Costarricense</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Residencia:</span>
+                        <span class="detail-value" th:text="${oferente.residencia}">Heredia</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Resumen</h2>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>Perfil</h3>
+                        <p>Oferente</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>CV</h3>
+                        <p th:if="${oferente.curriculumPdf != null}">SI</p>
+                        <p th:if="${oferente.curriculumPdf == null}">NO</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Acceso</h3>
+                        <p>Activo</p>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <h3 class="card-title">Acciones rapidas</h3>
+                    <div class="quick-links">
+                        <a th:href="@{/oferente/mis-habilidades-oferente}" class="btn btn-primary">Mis habilidades</a>
+                        <a th:href="@{/oferente/mi-cv-oferente}" class="btn btn-secondary">Mi CV</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="grid-2-equal">
+            <div class="content-card">
+                <h2 class="section-title">Estado del curriculum</h2>
+
+                <div class="cv-box">
+                    <p class="cv-status" th:if="${oferente != null and oferente.curriculumPdf != null}">
+                        Ya tiene un curriculum cargado en el sistema.
+                    </p>
+
+                    <p class="cv-status" th:if="${oferente != null and oferente.curriculumPdf == null}">
+                        Aun no ha cargado un curriculum.
+                    </p>
+
+                    <div class="form-actions">
+                        <a th:href="@{/oferente/mi-cv-oferente}" class="btn btn-primary">Administrar curriculum</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Habilidades</h2>
+
+                <p class="section-subtitle">
+                    Administre sus destrezas y niveles desde la seccion de habilidades.
+                </p>
+
+                <div class="form-actions">
+                    <a th:href="@{/oferente/mis-habilidades-oferente}" class="btn btn-primary">Ir a mis habilidades</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block" th:if="${oferente == null}">
+        <div class="empty-state">
+            <p>No se pudo cargar la informacion del oferente.</p>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

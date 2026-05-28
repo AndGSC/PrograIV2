@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Detalle del puesto')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-publica :: navPublica}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <section class="section-block">
+        <div class="content-card form-card" th:if="${puesto != null}">
+            <a th:href="@{/puestos}" class="btn btn-secondary btn-sm mb-3">&larr; Volver a puestos</a>
+
+            <h1 class="page-title" th:text="${puesto.descripcionGeneral}">Nombre del puesto</h1>
+
+            <p class="company-meta" th:text="${puesto.idEmpresa.nombre}">Empresa</p>
+
+            <div class="mt-3">
+                <p>
+                    <strong>Salario:</strong>
+                    $<span th:text="${#numbers.formatDecimal(puesto.salarioUsd, 1, 'COMMA', 2, 'POINT')}">0.00</span> USD
+                </p>
+                <p th:if="${salarioColones != null}">
+                    <strong>Salario en colones:</strong>
+                    ₡<span th:text="${#numbers.formatDecimal(salarioColones, 1, 'COMMA', 2, 'POINT')}">0.00</span> CRC
+                </p>
+                <p>
+                    <strong>Tipo de publicación:</strong>
+                    <span th:text="${puesto.tipoPublicacion}">PUBLICA</span>
+                </p>
+                <p>
+                    <strong>Localización:</strong>
+                    <span th:text="${puesto.idEmpresa.localizacion}">-</span>
+                </p>
+                <p>
+                    <strong>Estado:</strong>
+                    <span th:text="${puesto.activo ? 'Activo' : 'Inactivo'}">Activo</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="empty-state" th:if="${puesto == null}">
+            <p th:text="${error != null ? error : 'Puesto no encontrado.'}">Puesto no encontrado.</p>
+            <a th:href="@{/puestos}" class="btn btn-secondary mt-2">Volver a puestos</a>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

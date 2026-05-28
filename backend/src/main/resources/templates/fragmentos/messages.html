@@ -1,0 +1,13 @@
+<div th:fragment="messages" class="messages-container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}">
+        Operación realizada con éxito.
+    </div>
+
+    <div th:if="${message}" class="alert alert-info" th:text="${message}">
+        Operación realizada.
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}">
+        Ocurrió un error.
+    </div>
+</div>

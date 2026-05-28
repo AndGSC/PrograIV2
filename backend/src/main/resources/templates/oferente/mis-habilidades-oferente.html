@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Oferente - Mis habilidades')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-oferente :: navOferente}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <section class="section-block">
+        <h1 class="page-title">Mis habilidades</h1>
+
+        <div class="grid-3">
+
+            <div class="content-card">
+                <h2 class="section-title">Habilidades registradas</h2>
+
+                <div th:if="${habilidades != null and !#lists.isEmpty(habilidades)}">
+                    <div th:each="habilidad : ${habilidades}" class="habilidad-item">
+                        <div class="habilidad-info">
+                            <span class="habilidad-nombre"
+                                  th:text="${habilidad.caracteristica != null ? habilidad.caracteristica.nombre : 'Sin nombre'}">
+                                Nombre
+                            </span>
+                            <div class="nivel-estrellas">
+                                <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                      th:classappend="${i <= habilidad.nivel} ? 'estrella activa' : 'estrella'"
+                                      th:text="'★'">★</span>
+                            </div>
+                        </div>
+                        <div class="habilidad-acciones">
+
+                            <form th:action="@{/oferente/guardar-habilidad}" method="post" class="form-inline-nivel">
+                                <input type="hidden" name="idCaracteristica" th:value="${habilidad.idCaracteristica}">
+                                <input type="hidden" name="actualId" th:value="${nodoActual != null ? nodoActual.id : ''}">
+                                <select name="nivel" class="select-nivel-sm">
+                                    <option th:each="n : ${#numbers.sequence(1,5)}"
+                                            th:value="${n}"
+                                            th:text="${n}"
+                                            th:selected="${n == habilidad.nivel}">1</option>
+                                </select>
+                                <button type="submit" class="btn btn-secondary btn-sm">Actualizar</button>
+                            </form>
+                            <!-- Eliminar -->
+                            <form th:action="@{/oferente/eliminar-habilidad}" method="post" class="form-inline-nivel">
+                                <input type="hidden" name="idCaracteristica" th:value="${habilidad.idCaracteristica}">
+                                <input type="hidden" name="actualId" th:value="${nodoActual != null ? nodoActual.id : ''}">
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('¿Eliminar esta habilidad?')">✕</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-state" th:if="${habilidades == null or #lists.isEmpty(habilidades)}">
+                    <p>No hay habilidades registradas.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Explorar características</h2>
+
+                <!-- Breadcrumb -->
+                <div class="form-group">
+                    <div class="quick-links">
+                        <a th:href="@{/oferente/mis-habilidades-oferente}" class="btn btn-secondary btn-sm">Raíces</a>
+                        <span th:each="nodo : ${ruta}">
+                            <span class="breadcrumb-sep">›</span>
+                            <a th:href="@{/oferente/mis-habilidades-oferente(actualId=${nodo.id})}"
+                               class="btn btn-secondary btn-sm"
+                               th:text="${nodo.nombre}">Nodo</a>
+                        </span>
+                    </div>
+                </div>
+
+                <p class="section-subtitle" th:if="${nodoActual != null}">
+                    Subcategorías de: <strong th:text="${nodoActual.nombre}">Categoría</strong>
+                </p>
+                <p class="section-subtitle" th:if="${nodoActual == null}">Categorías raíz</p>
+
+                <div th:if="${subcategorias != null and !#lists.isEmpty(subcategorias)}">
+                    <div th:each="subcat : ${subcategorias}" class="subcat-item">
+                        <span th:text="${subcat.nombre}" class="subcat-nombre">Nombre</span>
+                        <div class="subcat-acciones">
+                            <span th:if="${idsRegistrados != null and #lists.contains(idsRegistrados, subcat.id)}"
+                                  class="badge-registrado">✓ Agregada</span>
+                            <a th:href="@{/oferente/mis-habilidades-oferente(actualId=${subcat.id})}"
+                               class="btn btn-secondary btn-sm">Entrar</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-state" th:if="${subcategorias == null or #lists.isEmpty(subcategorias)}">
+                    <p>No hay subcategorías en este nivel.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Agregar habilidad</h2>
+
+                <form th:action="@{/oferente/guardar-habilidad}" method="post">
+                    <input type="hidden" name="actualId" th:value="${nodoActual != null ? nodoActual.id : ''}">
+
+                    <div class="form-group">
+                        <label for="idCaracteristica">Característica</label>
+                        <select id="idCaracteristica" name="idCaracteristica" required>
+                            <option value="">Seleccione una característica</option>
+
+                            <!-- Sin nodo activo: muestra todo el árbol -->
+                            <th:block th:if="${nodoActual == null}">
+                                <optgroup th:each="cat : ${todasCaracteristicas}"
+                                          th:if="${cat.idPadre == null}"
+                                          th:label="${cat.nombre}">
+                                    <option th:value="${cat.id}"
+                                            th:text="${cat.nombre}">
+                                    </option>
+                                    <option th:each="hijo : ${todasCaracteristicas}"
+                                            th:if="${hijo.idPadre != null and hijo.idPadre.id == cat.id}"
+                                            th:value="${hijo.id}"
+                                            th:text="${'  └ ' + hijo.nombre}">
+                                    </option>
+                                </optgroup>
+                            </th:block>
+
+                            <!-- Con nodo activo: siempre muestra el nodo actual y sus hijos si los tiene -->
+                            <th:block th:if="${nodoActual != null}">
+                                <option th:value="${nodoActual.id}"
+                                        th:text="${nodoActual.nombre}"
+                                        selected>
+                                </option>
+                                <option th:each="hijo : ${subcategorias}"
+                                        th:value="${hijo.id}"
+                                        th:text="${'  └ ' + hijo.nombre}">
+                                </option>
+                            </th:block>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nivel">Nivel (1-5)</label>
+                        <div class="nivel-selector">
+                            <input type="range" id="nivelRange" min="1" max="5" value="3"
+                                   oninput="document.getElementById('nivel').value=this.value;
+                                            document.getElementById('nivelDisplay').textContent=this.value;">
+                            <span id="nivelDisplay" class="nivel-display">3</span>
+                        </div>
+                        <input type="hidden" id="nivel" name="nivel" value="3">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary w-100">Agregar / Actualizar</button>
+                    </div>
+                </form>
+
+
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<style>
+    .habilidad-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .habilidad-info { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; }
+    .habilidad-nombre { font-weight: 500; font-size: 0.9rem; }
+    .habilidad-acciones { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+    .nivel-estrellas { font-size: 0.85rem; }
+    .estrella { color: #d1d5db; }
+    .estrella.activa { color: #f59e0b; }
+    .form-inline-nivel { display: flex; gap: 0.3rem; align-items: center; }
+    .select-nivel-sm { padding: 0.2rem 0.4rem; font-size: 0.8rem; border: 1px solid #d1d5db; border-radius: 4px; }
+    .subcat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        gap: 0.5rem;
+    }
+    .subcat-nombre { font-size: 0.9rem; flex: 1; }
+    .subcat-acciones { display: flex; gap: 0.4rem; align-items: center; }
+    .badge-registrado {
+        background: #d1fae5;
+        color: #065f46;
+        font-size: 0.75rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+    .breadcrumb-sep { color: #9ca3af; margin: 0 0.2rem; }
+    .nivel-selector { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.3rem; }
+    .nivel-selector input[type=range] { flex: 1; }
+    .nivel-display {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #4f46e5;
+        min-width: 1.5rem;
+        text-align: center;
+    }
+</style>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

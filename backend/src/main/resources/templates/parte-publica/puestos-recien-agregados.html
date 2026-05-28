@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Bolsa de Empleo')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-publica :: navPublica}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <div th:replace="~{fragmentos/page-header :: pageHeader('Bolsa de Empleo', 'Puestos públicos más recientes')}"></div>
+
+    <section class="public-jobs-section">
+        <div class="jobs-grid" th:if="${puestosRecientes != null and !#lists.isEmpty(puestosRecientes)}">
+            <article class="job-card" th:each="puesto : ${puestosRecientes}">
+                <div class="job-card-body">
+                    <h2 class="job-company" th:text="${puesto.idEmpresa.nombre}">SoftLab</h2>
+
+                    <p class="job-position" th:text="${puesto.descripcionGeneral}">
+                        Unity game developer
+                    </p>
+
+                    <span class="badge badge-info job-type" th:text="${puesto.tipoPublicacion}">
+                        PUBLICA
+                    </span>
+
+                    <p class="job-salary">
+                        $<span th:text="${#numbers.formatDecimal(puesto.salarioUsd, 1, 'COMMA', 2, 'POINT')}">1300.00</span>
+                    </p>
+                    <p class="job-salary"
+                       style="font-size:0.9em;"
+                       th:if="${salariosColonesPorId != null and salariosColonesPorId[puesto.id] != null}">
+                        ₡<span th:text="${#numbers.formatDecimal(salariosColonesPorId[puesto.id], 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </p>
+
+                    <a class="job-detail-btn job-hover-trigger"
+                       th:href="@{/puesto/{id}(id=${puesto.id})}">
+                        Ver detalle
+                    </a>
+                </div>
+
+                <div class="job-hover-detail">
+                    <h3 class="job-hover-title" th:text="${puesto.descripcionGeneral}">
+                        Frontend Developer
+                    </h3>
+
+                    <ul class="job-feature-list"
+                        th:if="${puesto.caracteristicas != null and !#lists.isEmpty(puesto.caracteristicas)}">
+                        <li th:each="pc : ${puesto.caracteristicas}">
+                            <span th:text="${pc.caracteristica.nombre}">Tecnologías Web</span>
+                            <span>
+                                (nivel
+                                <span th:text="${pc.nivelRequerido}">3</span>)
+                            </span>
+                        </li>
+                    </ul>
+
+                    <p class="mb-0"
+                       th:if="${puesto.caracteristicas == null or #lists.isEmpty(puesto.caracteristicas)}">
+                        Este puesto no tiene características registradas.
+                    </p>
+                </div>
+            </article>
+        </div>
+
+        <div class="empty-state" th:if="${puestosRecientes == null or #lists.isEmpty(puestosRecientes)}">
+            <p>No hay puestos públicos registrados en este momento.</p>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

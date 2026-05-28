@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Registro empresa')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-publica :: navPublica}"></div>
+
+<main class="page-container">
+  <div class="form-wrapper">
+    <div class="content-card form-card">
+      <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+      <div th:replace="~{fragmentos/page-header :: pageHeader('Registro empresa', 'Complete los datos para solicitar el registro de su empresa')}"></div>
+
+      <form th:action="@{/registro-empresa}" th:object="${empresa}" method="post">
+        <div class="form-group">
+          <label for="nombre">Nombre de la empresa</label>
+          <input type="text"
+                 id="nombre"
+                 th:field="*{nombre}"
+                 placeholder="Ejemplo: Total Soft Inc."
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label for="localizacion">Localizacion</label>
+          <input type="text"
+                 id="localizacion"
+                 th:field="*{localizacion}"
+                 placeholder="Ejemplo: Heredia, Costa Rica">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Correo electronico</label>
+            <input type="email"
+                   id="email"
+                   th:field="*{email}"
+                   placeholder="empresa@correo.com"
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label for="telefono">Telefono</label>
+            <input type="text"
+                   id="telefono"
+                   th:field="*{telefono}"
+                   placeholder="Ejemplo: 22223333">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripcion</label>
+          <textarea id="descripcion"
+                    th:field="*{descripcion}"
+                    placeholder="Describa brevemente la empresa, sus servicios o el perfil de contratacion"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="clave">Clave</label>
+          <input type="password"
+                 id="clave"
+                 th:field="*{clave}"
+                 placeholder="Minimo 6 caracteres"
+                 required>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Registrar empresa</button>
+          <a th:href="@{/login}" class="btn btn-secondary">Ir a login</a>
+        </div>
+      </form>
+
+      <div class="mt-3 cv-box">
+        <h3 class="card-title">Importante</h3>
+        <p class="cv-status">
+          Despues del registro, la cuenta debe ser aprobada por la administracion antes de iniciar sesion.
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>
+

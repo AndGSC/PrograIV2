@@ -1,0 +1,543 @@
+<!-- Componente para Subir y Visualizar CV -->
+<!-- Guardar como: src/main/resources/templates/cv-uploader.html -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de CV</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px dashed #667eea;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            background: #f0f1ff;
+            border-color: #764ba2;
+        }
+
+        .upload-section.dragover {
+            background: #e8f0ff;
+            border-color: #667eea;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .upload-section p {
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .upload-section .file-input {
+            display: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .info-box.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .info-box.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .info-box.warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .file-info-text {
+            flex: 1;
+        }
+
+        .file-info-size {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .file-info-actions {
+            display: flex;
+            gap: 10px;
+            margin-left: 15px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .viewer-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .viewer-header {
+            background: #f8f9fa;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .viewer-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-badge.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .file-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .file-info-actions {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+            }
+
+            .file-info-actions .btn {
+                flex: 1;
+            }
+
+            iframe {
+                height: 400px;
+            }
+        }
+
+        .instructions {
+            background: #f0f1ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            list-style-position: inside;
+            color: #555;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>📄 Gestor de Currículo</h1>
+            <p style="color: #666; margin-bottom: 20px;">Sube, visualiza y gestiona tu currículo profesional</p>
+
+            <div class="instructions">
+                <h4>ℹ️ Instrucciones</h4>
+                <ul>
+                    <li>Formatos permitidos: PDF, DOC, DOCX</li>
+                    <li>Tamaño máximo: 10 MB</li>
+                    <li>Puedes reemplazar tu CV en cualquier momento</li>
+                    <li>El CV se visualizará en tu perfil para las empresas</li>
+                </ul>
+            </div>
+
+            <!-- Sección de Upload -->
+            <h2>📤 Subir Currículo</h2>
+            <div class="upload-section" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <p><strong>Arrastra tu CV aquí o haz clic para seleccionar</strong></p>
+                <p style="font-size: 14px; color: #999;">Formatos: PDF, DOC, DOCX • Máximo: 10 MB</p>
+                <input type="file" id="fileInput" class="file-input" accept=".pdf,.doc,.docx">
+            </div>
+
+            <div id="uploadStatus"></div>
+
+            <!-- Sección de Información del CV -->
+            <h2>ℹ️ Mi Currículo</h2>
+            <div id="cvInfo">
+                <p style="color: #999; text-align: center; padding: 20px;">Cargando información...</p>
+            </div>
+
+            <!-- Sección de Visualización -->
+            <h2>👁️ Vista Previa</h2>
+            <div id="viewerContainer"></div>
+        </div>
+
+        <!-- Sección de Pruebas (solo para desarrollo) -->
+        <div class="card" style="display: none;" id="devSection">
+            <h2>🧪 Sección de Pruebas (Desarrollo)</h2>
+            <div class="grid-2">
+                <div>
+                    <label>ID de Oferente:</label>
+                    <input type="number" id="devOfferenteId" value="1" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                </div>
+                <div>
+                    <button class="btn btn-secondary" onclick="devCheckCV()">Verificar CV</button>
+                    <button class="btn btn-secondary" onclick="devOpenViewer()">Abrir Visor</button>
+                </div>
+            </div>
+            <div id="devOutput" style="background: #f8f9fa; padding: 10px; margin-top: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos del DOM
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const cvInfo = document.getElementById('cvInfo');
+        const viewerContainer = document.getElementById('viewerContainer');
+
+        // Variables globales
+        let currentOfferenteId = null;
+
+        // Función para obtener ID del oferente (desde sesión/API)
+        async function obtenerIdOferente() {
+            try {
+                // Intenta obtener del endpoint info-cv que valida sesión
+                const response = await fetch('/oferente/info-cv', {
+                    method: 'GET'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Si llegamos aquí, el usuario está autenticado
+                    // El ID se obtiene desde el contexto (requiere ser pasado por el backend)
+                    return 1; // Placeholder - debe venir de sesión real
+                } else {
+                    console.warn('No autenticado');
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error al obtener ID:', error);
+                return null;
+            }
+        }
+
+        // Inicializar
+        async function init() {
+            currentOfferenteId = await obtenerIdOferente();
+            if (currentOfferenteId) {
+                cargarInfoCV();
+            }
+            setupUploadArea();
+        }
+
+        // Setup del área de upload
+        function setupUploadArea() {
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    subirCV();
+                }
+            });
+
+            fileInput.addEventListener('change', subirCV);
+        }
+
+        // Subir CV
+        async function subirCV() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Validar tipo de archivo
+            const tiposPermitidos = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!tiposPermitidos.includes(file.type)) {
+                mostrarMensaje('error', '❌ Tipo de archivo no permitido. Usa PDF, DOC o DOCX');
+                return;
+            }
+
+            // Validar tamaño (10 MB)
+            if (file.size > 10 * 1024 * 1024) {
+                mostrarMensaje('error', '❌ El archivo excede 10 MB');
+                return;
+            }
+
+            mostrarMensaje('warning', '⏳ Subiendo CV...');
+
+            const formData = new FormData();
+            formData.append('archivo', file);
+
+            try {
+                const response = await fetch('/oferente/subir-cv', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    mostrarMensaje('success', '✅ ' + data.mensaje);
+                    cargarInfoCV();
+                    fileInput.value = '';
+                } else {
+                    mostrarMensaje('error', '❌ Error: ' + data.mensaje);
+                }
+            } catch (error) {
+                mostrarMensaje('error', '❌ Error al subir: ' + error.message);
+            }
+        }
+
+        // Cargar información del CV
+        async function cargarInfoCV() {
+            try {
+                const response = await fetch('/oferente/info-cv');
+                const data = await response.json();
+
+                if (data.existe) {
+                    cvInfo.innerHTML = `
+                        <div class="file-info">
+                            <div class="file-info-text">
+                                <strong>✓ Tienes un CV guardado</strong>
+                                <div class="file-info-size">
+                                    Tamaño: ${(data.tamanio / 1024).toFixed(2)} KB
+                                </div>
+                            </div>
+                            <div class="file-info-actions">
+                                <a href="/api/cv/descargar/1" class="btn btn-secondary btn-sm">📥 Descargar</a>
+                                <button class="btn btn-primary btn-sm" onclick="visualizarCV()">👁️ Ver</button>
+                            </div>
+                        </div>
+                    `;
+                    visualizarCV();
+                } else {
+                    cvInfo.innerHTML = `
+                        <div class="info-box warning">
+                            ⚠️ No tienes un CV guardado aún. Sube uno para que las empresas puedan verlo.
+                        </div>
+                    `;
+                    viewerContainer.innerHTML = '';
+                }
+            } catch (error) {
+                cvInfo.innerHTML = `<div class="info-box error">❌ Error al cargar información: ${error.message}</div>`;
+            }
+        }
+
+        // Visualizar CV
+        async function visualizarCV() {
+            try {
+                const response = await fetch('/oferente/info-cv');
+                const data = await response.json();
+
+                if (data.urlVisualizador) {
+                    viewerContainer.innerHTML = `
+                        <div class="viewer-container">
+                            <div class="viewer-header">
+                                <h3>Tu Currículo</h3>
+                                <a href="/api/cv/descargar/1" class="btn btn-secondary btn-sm">📥 Descargar</a>
+                            </div>
+                            <iframe src="${data.urlVisualizador}" title="CV Viewer"></iframe>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                viewerContainer.innerHTML = `<div class="info-box error">❌ Error al cargar visor: ${error.message}</div>`;
+            }
+        }
+
+        // Mostrar mensaje
+        function mostrarMensaje(tipo, mensaje) {
+            uploadStatus.innerHTML = `<div class="info-box ${tipo}">${mensaje}</div>`;
+        }
+
+        // Funciones de desarrollo
+        function devCheckCV() {
+            const id = document.getElementById('devOfferenteId').value;
+            fetch(`/api/cv/existe/${id}`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('devOutput').textContent = JSON.stringify(data, null, 2);
+                });
+        }
+
+        function devOpenViewer() {
+            const id = document.getElementById('devOfferenteId').value;
+            window.open(`/api/cv/ver/${id}`, '_blank');
+        }
+
+        // Iniciar cuando cargue el DOM
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

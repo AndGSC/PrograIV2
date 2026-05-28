@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Empresa - Dashboard')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-empresa :: navEmpresa}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <div th:replace="~{fragmentos/page-header :: pageHeader('Dashboard empresa', 'Panel principal de la empresa')}"></div>
+
+    <section class="section-block" th:if="${empresa != null}">
+        <div class="grid-2-equal">
+            <div class="content-card">
+                <h2 class="section-title">Informacion de la empresa</h2>
+
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Nombre:</span>
+                        <span class="detail-value" th:text="${empresa.nombre}">Empresa Demo</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Correo:</span>
+                        <span class="detail-value" th:text="${empresa.usuarios.correo}">empresa@correo.com</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Localizacion:</span>
+                        <span class="detail-value" th:text="${empresa.localizacion}">San Jose</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Telefono:</span>
+                        <span class="detail-value" th:text="${empresa.telefono}">22223333</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Descripcion:</span>
+                        <span class="detail-value" th:text="${empresa.descripcion}">Descripcion de la empresa</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Resumen</h2>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>Puestos</h3>
+                        <p th:text="${cantidadPuestos}">0</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Estado</h3>
+                        <p>Activa</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>Panel</h3>
+                        <p>Empresa</p>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <h3 class="card-title">Acciones rapidas</h3>
+                    <div class="quick-links">
+                        <a th:href="@{/empresa/mis-puestos-empresa}" class="btn btn-primary">Ver mis puestos</a>
+                        <a th:href="@{/empresa/publicar-puesto}" class="btn btn-secondary">Publicar puesto</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="grid-2-equal">
+            <div class="content-card">
+                <h2 class="section-title">Publicar puesto</h2>
+                <p class="section-subtitle">Registre un nuevo puesto con sus características requeridas.</p>
+                <a th:href="@{/empresa/publicar-puesto}" class="btn btn-primary">Ir a publicar puesto</a>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Puestos recientes</h2>
+
+                <div class="table-wrapper" th:if="${puestos != null and !#lists.isEmpty(puestos)}">
+                    <table class="table-compact">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Descripcion</th>
+                            <th>Salario</th>
+                            <th>Tipo</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="puesto : ${puestos}">
+                            <td th:text="${puesto.id}">1</td>
+                            <td th:text="${puesto.descripcionGeneral}">Backend Developer</td>
+                            <td>
+                                $<span th:text="${#numbers.formatDecimal(puesto.salarioUsd, 1, 'COMMA', 2, 'POINT')}">1200.00</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-info" th:text="${puesto.tipoPublicacion}">PUBLICO</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="empty-state" th:if="${puestos == null or #lists.isEmpty(puestos)}">
+                    <p>Esta empresa aun no tiene puestos registrados.</p>
+                </div>
+
+                <div class="mt-3">
+                    <a th:href="@{/empresa/mis-puestos-empresa}" class="btn btn-secondary">Ir a mis puestos</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block" th:if="${empresa == null}">
+        <div class="empty-state">
+            <p>No se pudo cargar la informacion de la empresa.</p>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>

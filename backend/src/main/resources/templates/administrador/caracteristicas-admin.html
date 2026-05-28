@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/head :: head('Administrador - Caracteristicas')}"></head>
+<body>
+
+<div th:replace="~{fragmentos/nav-admin :: navAdmin}"></div>
+
+<main class="page-container">
+    <div th:replace="~{fragmentos/messages :: messages}"></div>
+
+    <div th:replace="~{fragmentos/page-header :: pageHeader('Caracteristicas', 'Administracion del catalogo jerarquico de caracteristicas')}"></div>
+
+    <section class="section-block">
+        <div class="feature-layout">
+            <div class="content-card">
+                <div class="search-results-header">
+                    <h2 class="section-title mb-0">Arbol de caracteristicas</h2>
+                    <span class="badge badge-neutral"
+                          th:text="${caracteristicas != null ? #lists.size(caracteristicas) + ' total' : '0 total'}">
+                        0 total
+                    </span>
+                </div>
+
+                <p class="section-subtitle">
+                    Estas caracteristicas se usan para configurar puestos y habilidades de oferentes.
+                </p>
+
+                <ul class="feature-tree" th:if="${principales != null and !#lists.isEmpty(principales)}">
+                    <li th:each="principal : ${principales}">
+                        <span class="feature-name" th:text="${principal.nombre}">Lenguajes de programacion</span>
+                        <span class="feature-meta">
+                            (ID: <span th:text="${principal.id}">1</span>)
+                        </span>
+
+                        <ul th:if="${principal.caracteristicas != null and !#sets.isEmpty(principal.caracteristicas)}">
+                            <li th:each="hija : ${principal.caracteristicas}">
+                                <span th:text="${hija.nombre}">Java</span>
+                                <span class="feature-meta">
+                                    (ID: <span th:text="${hija.id}">2</span>)
+                                </span>
+
+                                <ul th:if="${hija.caracteristicas != null and !#sets.isEmpty(hija.caracteristicas)}">
+                                    <li th:each="nieta : ${hija.caracteristicas}">
+                                        <span th:text="${nieta.nombre}">Spring</span>
+                                        <span class="feature-meta">
+                                            (ID: <span th:text="${nieta.id}">3</span>)
+                                        </span>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="empty-state" th:if="${principales == null or #lists.isEmpty(principales)}">
+                    <p>No hay caracteristicas registradas en el sistema.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2 class="section-title">Agregar caracteristica</h2>
+                <p class="section-subtitle">
+                    Registre una nueva caracteristica principal o una subcaracteristica.
+                </p>
+
+                <form th:action="@{/administrador/crear-caracteristica}" method="post">
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text"
+                               id="nombre"
+                               name="nombre"
+                               placeholder="Ejemplo: HTML, Java, Base de datos"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="idPadre">Caracteristica padre</label>
+                        <select id="idPadre" name="idPadre">
+                            <option value="">Sin padre (principal)</option>
+                            <option th:each="caracteristica : ${caracteristicas}"
+                                    th:value="${caracteristica.id}"
+                                    th:text="${caracteristica.nombre}">
+                                Lenguajes de programacion
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar caracteristica</button>
+                        <a th:href="@{/administrador/dashboard-admin}" class="btn btn-secondary">Volver al dashboard</a>
+                    </div>
+                </form>
+
+                <div class="mt-3 cv-box">
+                    <h3 class="card-title">Notas</h3>
+                    <p class="cv-status">
+                        Si no selecciona una caracteristica padre, el sistema la registrara como principal.
+                    </p>
+                    <p class="file-help">
+                        Si selecciona una caracteristica padre, se registrara como hija de esa categoria.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragmentos/footer :: footer}"></div>
+
+</body>
+</html>
