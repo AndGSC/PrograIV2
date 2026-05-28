@@ -1,0 +1,23 @@
+﻿# IntelliJ
+.idea/
+*.iml
+out/
+
+# Java / Maven
+target/
+**/target/
+*.class
+
+# React / Node
+frontend/node_modules/
+frontend/dist/
+
+# Variables de entorno
+.env
+.env.local
+.env.development.local
+.env.production.local
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
