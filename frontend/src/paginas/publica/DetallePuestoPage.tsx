@@ -1,24 +1,57 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+
 import PageHeader from '../../componentes/comunes/PageHeader';
+import MessageBox from '../../componentes/comunes/MessageBox';
+import Loading from '../../componentes/comunes/Loading';
+import EmptyState from '../../componentes/comunes/EmptyState';
+
+import { obtenerDetallePuesto } from '../../api/publicApi';
+import { ApiError } from '../../api/http';
+
+import type { PuestoPublico } from '../../tipos/puesto';
 
 function DetallePuestoPage() {
     const { id } = useParams();
 
-    const puesto = {
-        id,
-        empresa: 'Empresa Demo',
-        puesto: 'Desarrollador Frontend',
-        salario: '₡850 000',
-        tipo: 'Pública',
-        descripcion: 'Puesto orientado al desarrollo de interfaces web para aplicaciones empresariales.',
-        requisitos: [
-            'HTML - Intermedio',
-            'CSS - Intermedio',
-            'JavaScript - Intermedio',
-            'React - Básico'
-        ]
-    };
+    const [puesto, setPuesto] = useState<PuestoPublico | null>(null);
+    const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('info');
+    const [cargando, setCargando] = useState(true);
+
+    useEffect(() => {
+        async function cargarDetallePuesto() {
+            if (!id) {
+                setPuesto(null);
+                setTipoMensaje('danger');
+                setMensaje('No se indicó el puesto que desea consultar.');
+                setCargando(false);
+                return;
+            }
+
+            setMensaje('');
+            setTipoMensaje('info');
+            setCargando(true);
+
+            try {
+                const datos = await obtenerDetallePuesto(id);
+                setPuesto(datos);
+            } catch (error) {
+                setPuesto(null);
+                setTipoMensaje('danger');
+
+                if (error instanceof ApiError) {
+                    setMensaje(error.message);
+                } else {
+                    setMensaje('No se pudo cargar el detalle del puesto.');
+                }
+            } finally {
+                setCargando(false);
+            }
+        }
+
+        cargarDetallePuesto();
+    }, [id]);
 
     return (
         <>
@@ -27,53 +60,67 @@ function DetallePuestoPage() {
                 subtitulo="Información general y características requeridas"
             />
 
-            <section className="content-layout">
-                <div className="detail-card">
-                    <h2 className="section-title">{puesto.puesto}</h2>
+            <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
 
-                    <div className="detail-list">
-                        <div className="detail-item">
-                            <span className="detail-label">Empresa:</span>
-                            <span className="detail-value">{puesto.empresa}</span>
+            {cargando ? (
+                <Loading mensaje="Cargando detalle del puesto..." />
+            ) : !puesto ? (
+                <EmptyState mensaje="No se encontró información del puesto solicitado." />
+            ) : (
+                <section className="content-layout">
+                    <div className="detail-card">
+                        <h2 className="section-title">{puesto.puesto}</h2>
+
+                        <div className="detail-list">
+                            <div className="detail-item">
+                                <span className="detail-label">Empresa:</span>
+                                <span className="detail-value">{puesto.empresa}</span>
+                            </div>
+
+                            <div className="detail-item">
+                                <span className="detail-label">Salario ofrecido:</span>
+                                <span className="detail-value">{puesto.salario}</span>
+                            </div>
+
+                            <div className="detail-item">
+                                <span className="detail-label">Tipo de publicación:</span>
+                                <span className="badge badge-info">{puesto.tipo}</span>
+                            </div>
+
+                            <div className="detail-item">
+                                <span className="detail-label">Descripción:</span>
+                                <p className="detail-value mt-1">
+                                    {puesto.descripcion || 'Sin descripción registrada.'}
+                                </p>
+                            </div>
                         </div>
 
-                        <div className="detail-item">
-                            <span className="detail-label">Salario ofrecido:</span>
-                            <span className="detail-value">{puesto.salario}</span>
-                        </div>
+                        <div className="actions-row mt-3">
+                            <Link to="/puestos" className="btn btn-secondary">
+                                Volver a búsqueda
+                            </Link>
 
-                        <div className="detail-item">
-                            <span className="detail-label">Tipo de publicación:</span>
-                            <span className="badge badge-info">{puesto.tipo}</span>
-                        </div>
-
-                        <div className="detail-item">
-                            <span className="detail-label">Descripción:</span>
-                            <p className="detail-value mt-1">{puesto.descripcion}</p>
+                            <Link to="/puestos-publicos" className="btn btn-outline-dark">
+                                Ver puestos públicos
+                            </Link>
                         </div>
                     </div>
 
-                    <div className="actions-row mt-3">
-                        <Link to="/puestos" className="btn btn-secondary">
-                            Volver a búsqueda
-                        </Link>
+                    <aside className="info-card">
+                        <h3 className="card-title">Características requeridas</h3>
 
-                        <Link to="/puestos-publicos" className="btn btn-outline-dark">
-                            Ver puestos públicos
-                        </Link>
-                    </div>
-                </div>
-
-                <aside className="info-card">
-                    <h3 className="card-title">Características requeridas</h3>
-
-                    <ul className="simple-list">
-                        {puesto.requisitos.map((requisito, index) => (
-                            <li key={index}>{requisito}</li>
-                        ))}
-                    </ul>
-                </aside>
-            </section>
+                        {puesto.caracteristicas && puesto.caracteristicas.length > 0 ? (
+                            <ul className="simple-list">
+                                {puesto.caracteristicas.map((caracteristica, index) => (
+                                    <li key={index}>{caracteristica}</li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <EmptyState mensaje="Este puesto no tiene características registradas." />
+                        )}
+                    </aside>
+                </section>
+            )}
         </>
     );
 }

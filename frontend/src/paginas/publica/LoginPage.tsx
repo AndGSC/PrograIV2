@@ -1,6 +1,17 @@
 import React, { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
 import MessageBox from '../../componentes/comunes/MessageBox';
+import Loading from '../../componentes/comunes/Loading';
+
+import { login } from '../../api/authApi';
+import { ApiError } from '../../api/http';
+
+import {
+    guardarSesion,
+    normalizarRol,
+    obtenerRutaPorRol
+} from '../../utils/authStorage';
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -8,46 +19,43 @@ function LoginPage() {
     const [correo, setCorreo] = useState('');
     const [clave, setClave] = useState('');
     const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('info');
+    const [cargando, setCargando] = useState(false);
 
-    function iniciarSesion(event: FormEvent<HTMLFormElement>) {
+    async function iniciarSesion(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        setMensaje('El login se conectará luego con el backend y JWT.');
+        setMensaje('');
+        setTipoMensaje('info');
+        setCargando(true);
 
-        /*
-            Luego esto se reemplaza por authApi.login(correo, clave).
+        try {
+            const respuesta = await login({
+                correo,
+                clave
+            });
 
-            localStorage.setItem('token', token);
-            localStorage.setItem('rol', rol);
-            localStorage.setItem('correo', correo);
+            const rolNormalizado = normalizarRol(respuesta.rol);
 
-            if (rol === 'ROLE_ADMIN') navigate('/admin');
-            if (rol === 'ROLE_EMPRESA') navigate('/empresa');
-            if (rol === 'ROLE_OFERENTE') navigate('/oferente');
-        */
+            guardarSesion(
+                respuesta.token,
+                rolNormalizado,
+                respuesta.correo
+            );
 
-        if (correo.includes('admin')) {
-            localStorage.setItem('token', 'token-demo');
-            localStorage.setItem('rol', 'ROLE_ADMIN');
-            localStorage.setItem('correo', correo);
-            navigate('/admin');
-            return;
-        }
+            const rutaDestino = obtenerRutaPorRol(rolNormalizado);
 
-        if (correo.includes('empresa')) {
-            localStorage.setItem('token', 'token-demo');
-            localStorage.setItem('rol', 'ROLE_EMPRESA');
-            localStorage.setItem('correo', correo);
-            navigate('/empresa');
-            return;
-        }
+            navigate(rutaDestino);
+        } catch (error) {
+            setTipoMensaje('danger');
 
-        if (correo.includes('oferente')) {
-            localStorage.setItem('token', 'token-demo');
-            localStorage.setItem('rol', 'ROLE_OFERENTE');
-            localStorage.setItem('correo', correo);
-            navigate('/oferente');
-            return;
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo iniciar sesión. Intente nuevamente.');
+            }
+        } finally {
+            setCargando(false);
         }
     }
 
@@ -55,11 +63,16 @@ function LoginPage() {
         <div className="auth-container">
             <div className="auth-card">
                 <h1 className="auth-title">Iniciar sesión</h1>
+
                 <p className="auth-subtitle">
                     Ingrese sus credenciales para acceder al sistema
                 </p>
 
-                <MessageBox tipo="info" mensaje={mensaje} />
+                <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
+
+                {cargando && (
+                    <Loading mensaje="Validando credenciales..." />
+                )}
 
                 <form onSubmit={iniciarSesion}>
                     <div className="form-group">
@@ -71,6 +84,7 @@ function LoginPage() {
                             onChange={(event) => setCorreo(event.target.value)}
                             placeholder="correo@ejemplo.com"
                             required
+                            disabled={cargando}
                         />
                     </div>
 
@@ -83,12 +97,17 @@ function LoginPage() {
                             onChange={(event) => setClave(event.target.value)}
                             placeholder="Ingrese su clave"
                             required
+                            disabled={cargando}
                         />
                     </div>
 
                     <div className="form-actions">
-                        <button type="submit" className="btn btn-primary w-100">
-                            Ingresar
+                        <button
+                            type="submit"
+                            className="btn btn-primary w-100"
+                            disabled={cargando}
+                        >
+                            {cargando ? 'Ingresando...' : 'Ingresar'}
                         </button>
                     </div>
                 </form>

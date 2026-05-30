@@ -1,6 +1,11 @@
 import React, { FormEvent, useState } from 'react';
+
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
+import Loading from '../../componentes/comunes/Loading';
+
+import { registrarEmpresa as registrarEmpresaApi } from '../../api/publicApi';
+import { ApiError } from '../../api/http';
 
 function RegistroEmpresaPage() {
     const [nombre, setNombre] = useState('');
@@ -9,11 +14,48 @@ function RegistroEmpresaPage() {
     const [telefono, setTelefono] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [clave, setClave] = useState('');
-    const [mensaje, setMensaje] = useState('');
 
-    function registrarEmpresa(event: FormEvent<HTMLFormElement>) {
+    const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('success');
+    const [cargando, setCargando] = useState(false);
+
+    async function registrarEmpresa(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        setMensaje('El registro de empresa se conectará luego con el backend REST.');
+
+        setMensaje('');
+        setTipoMensaje('info');
+        setCargando(true);
+
+        try {
+            await registrarEmpresaApi({
+                nombre,
+                localizacion,
+                correo,
+                telefono,
+                descripcion,
+                clave
+            });
+
+            setNombre('');
+            setLocalizacion('');
+            setCorreo('');
+            setTelefono('');
+            setDescripcion('');
+            setClave('');
+
+            setTipoMensaje('success');
+            setMensaje('Solicitud de registro enviada correctamente. Debe esperar la aprobación del administrador.');
+        } catch (error) {
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo registrar la empresa. Intente nuevamente.');
+            }
+        } finally {
+            setCargando(false);
+        }
     }
 
     function limpiarFormulario() {
@@ -24,6 +66,7 @@ function RegistroEmpresaPage() {
         setDescripcion('');
         setClave('');
         setMensaje('');
+        setTipoMensaje('success');
     }
 
     return (
@@ -33,7 +76,11 @@ function RegistroEmpresaPage() {
                 subtitulo="Complete la información para solicitar el registro de la empresa"
             />
 
-            <MessageBox tipo="success" mensaje={mensaje} />
+            <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
+
+            {cargando && (
+                <Loading mensaje="Enviando solicitud de registro..." />
+            )}
 
             <div className="form-wrapper">
                 <form className="form-card" onSubmit={registrarEmpresa}>
@@ -46,6 +93,7 @@ function RegistroEmpresaPage() {
                                 value={nombre}
                                 onChange={(event) => setNombre(event.target.value)}
                                 required
+                                disabled={cargando}
                             />
                         </div>
 
@@ -57,6 +105,7 @@ function RegistroEmpresaPage() {
                                 value={localizacion}
                                 onChange={(event) => setLocalizacion(event.target.value)}
                                 required
+                                disabled={cargando}
                             />
                         </div>
                     </div>
@@ -70,6 +119,7 @@ function RegistroEmpresaPage() {
                                 value={correo}
                                 onChange={(event) => setCorreo(event.target.value)}
                                 required
+                                disabled={cargando}
                             />
                         </div>
 
@@ -81,6 +131,7 @@ function RegistroEmpresaPage() {
                                 value={telefono}
                                 onChange={(event) => setTelefono(event.target.value)}
                                 required
+                                disabled={cargando}
                             />
                         </div>
                     </div>
@@ -92,6 +143,7 @@ function RegistroEmpresaPage() {
                             value={descripcion}
                             onChange={(event) => setDescripcion(event.target.value)}
                             required
+                            disabled={cargando}
                         />
                     </div>
 
@@ -103,18 +155,24 @@ function RegistroEmpresaPage() {
                             value={clave}
                             onChange={(event) => setClave(event.target.value)}
                             required
+                            disabled={cargando}
                         />
                     </div>
 
                     <div className="form-actions">
-                        <button type="submit" className="btn btn-primary">
-                            Enviar solicitud
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            disabled={cargando}
+                        >
+                            {cargando ? 'Enviando...' : 'Enviar solicitud'}
                         </button>
 
                         <button
                             type="button"
                             className="btn btn-secondary"
                             onClick={limpiarFormulario}
+                            disabled={cargando}
                         >
                             Limpiar
                         </button>
