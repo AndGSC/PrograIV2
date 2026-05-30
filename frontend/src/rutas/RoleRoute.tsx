@@ -1,6 +1,9 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
+import { estaAutenticado, tieneRol } from '../utils/authStorage';
+import { RUTA_HOME, RUTA_LOGIN } from '../utils/constants';
+
 interface RoleRouteProps {
     children: React.ReactNode;
     rolesPermitidos: string[];
@@ -9,23 +12,20 @@ interface RoleRouteProps {
 function RoleRoute({ children, rolesPermitidos }: RoleRouteProps) {
     const location = useLocation();
 
-    const token = localStorage.getItem('token');
-    const rol = localStorage.getItem('rol');
-
-    if (!token) {
+    if (!estaAutenticado()) {
         return (
             <Navigate
-                to="/login"
+                to={RUTA_LOGIN}
                 replace
                 state={{ from: location.pathname }}
             />
         );
     }
 
-    if (!rol || !rolesPermitidos.includes(rol)) {
+    if (!tieneRol(rolesPermitidos)) {
         return (
             <Navigate
-                to="/"
+                to={RUTA_HOME}
                 replace
             />
         );

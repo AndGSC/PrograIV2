@@ -1,16 +1,16 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
+import { cerrarSesion, obtenerCorreo } from '../../utils/authStorage';
+import { RUTA_LOGIN } from '../../utils/constants';
+
 function NavAdmin() {
     const navigate = useNavigate();
-    const usuario = localStorage.getItem('correo') || 'Administrador';
+    const usuario = obtenerCorreo() || 'Administrador';
 
-    function cerrarSesion() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('rol');
-        localStorage.removeItem('correo');
-
-        navigate('/login');
+    function manejarCerrarSesion() {
+        cerrarSesion();
+        navigate(RUTA_LOGIN);
     }
 
     return (
@@ -61,7 +61,7 @@ function NavAdmin() {
                         <button
                             type="button"
                             className="btn btn-outline-light btn-sm"
-                            onClick={cerrarSesion}
+                            onClick={manejarCerrarSesion}
                         >
                             Salir
                         </button>

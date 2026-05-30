@@ -52,13 +52,25 @@ export function registrarOferente(datos: RegistroOferenteRequest) {
 }
 
 export function obtenerPuestosPublicos() {
-    return httpGet<PuestoPublico[]>(ENDPOINT_PUESTOS_PUBLICOS, undefined, false);
+    return httpGet<PuestoPublico[]>(
+        ENDPOINT_PUESTOS_PUBLICOS,
+        undefined,
+        false
+    );
 }
 
 export function buscarPuestos(params: BuscarPuestosParams) {
-    return httpGet<PuestoPublico[]>(ENDPOINT_BUSCAR_PUESTOS, params, false);
+    return httpGet<PuestoPublico[]>(
+        ENDPOINT_BUSCAR_PUESTOS,
+        params,
+        false
+    );
 }
 
 export function obtenerDetallePuesto(id: number | string) {
-    return httpGet<PuestoPublico>(`${ENDPOINT_PUESTOS_PUBLICOS}/${id}`, undefined, false);
+    return httpGet<PuestoPublico>(
+        `${ENDPOINT_PUESTOS_PUBLICOS}/${id}`,
+        undefined,
+        false
+    );
 }

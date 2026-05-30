@@ -1,5 +1,7 @@
 import { httpGet, httpPost, httpDelete, httpUpload } from './http';
+
 import {
+    API_BASE_URL,
     ENDPOINT_OFERENTE_HABILIDADES,
     ENDPOINT_OFERENTE_CV
 } from '../utils/constants';
@@ -44,7 +46,7 @@ export function agregarHabilidad(datos: AgregarHabilidadRequest) {
     return httpPost<Habilidad>(ENDPOINT_OFERENTE_HABILIDADES, datos);
 }
 
-export function eliminarHabilidad(id: number) {
+export function eliminarHabilidad(id: number | string) {
     return httpDelete<void>(`${ENDPOINT_OFERENTE_HABILIDADES}/${id}`);
 }
 
@@ -60,5 +62,9 @@ export function subirCv(archivo: File) {
 }
 
 export function obtenerUrlCv() {
-    return ENDPOINT_OFERENTE_CV;
+    const baseUrlNormalizada = API_BASE_URL.endsWith('/')
+        ? API_BASE_URL.slice(0, -1)
+        : API_BASE_URL;
+
+    return `${baseUrlNormalizada}${ENDPOINT_OFERENTE_CV}`;
 }

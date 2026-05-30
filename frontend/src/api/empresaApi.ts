@@ -53,23 +53,35 @@ export function obtenerMisPuestos() {
 }
 
 export function publicarPuesto(datos: PublicarPuestoRequest) {
-    return httpPost<PuestoEmpresa>(ENDPOINT_EMPRESA_PUESTOS, datos);
+    return httpPost<PuestoEmpresa>(
+        ENDPOINT_EMPRESA_PUESTOS,
+        datos
+    );
 }
 
-export function obtenerDetallePuestoEmpresa(id: number) {
-    return httpGet<PuestoEmpresa>(`${ENDPOINT_EMPRESA_PUESTOS}/${id}`);
+export function obtenerDetallePuestoEmpresa(id: number | string) {
+    return httpGet<PuestoEmpresa>(
+        `${ENDPOINT_EMPRESA_PUESTOS}/${id}`
+    );
 }
 
-export function desactivarPuesto(id: number) {
-    return httpPatch<void>(`${ENDPOINT_EMPRESA_PUESTOS}/${id}/desactivar`);
+export function desactivarPuesto(id: number | string) {
+    return httpPatch<void>(
+        `${ENDPOINT_EMPRESA_PUESTOS}/${id}/desactivar`
+    );
 }
 
 export function buscarCandidatos(params: BuscarCandidatosParams) {
-    return httpGet<Candidato[]>(ENDPOINT_EMPRESA_CANDIDATOS, params);
+    return httpGet<Candidato[]>(
+        ENDPOINT_EMPRESA_CANDIDATOS,
+        params
+    );
 }
 
 export function obtenerDetalleCandidato(id: number | string) {
-    return httpGet<Candidato>(`${ENDPOINT_EMPRESA_CANDIDATOS}/${id}`);
+    return httpGet<Candidato>(
+        `${ENDPOINT_EMPRESA_CANDIDATOS}/${id}`
+    );
 }
 
 export function obtenerUrlCurriculoCandidato(id: number | string) {

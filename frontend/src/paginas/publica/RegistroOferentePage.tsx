@@ -18,6 +18,18 @@ function RegistroOferentePage() {
         setMensaje('El registro de oferente se conectará luego con el backend REST.');
     }
 
+    function limpiarFormulario() {
+        setIdentificacion('');
+        setNombre('');
+        setPrimerApellido('');
+        setNacionalidad('');
+        setTelefono('');
+        setCorreo('');
+        setResidencia('');
+        setClave('');
+        setMensaje('');
+    }
+
     return (
         <>
             <PageHeader
@@ -128,7 +140,11 @@ function RegistroOferentePage() {
                             Enviar solicitud
                         </button>
 
-                        <button type="reset" className="btn btn-secondary">
+                        <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={limpiarFormulario}
+                        >
                             Limpiar
                         </button>
                     </div>
