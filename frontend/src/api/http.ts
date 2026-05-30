@@ -37,7 +37,11 @@ function construirUrl(endpoint: string, params?: ParametrosUrl): string {
         ? endpoint
         : `/${endpoint}`;
 
-    const url = new URL(`${API_BASE_URL}${endpointNormalizado}`);
+    const baseUrlNormalizada = API_BASE_URL.endsWith('/')
+        ? API_BASE_URL.slice(0, -1)
+        : API_BASE_URL;
+
+    const url = new URL(`${baseUrlNormalizada}${endpointNormalizado}`);
 
     if (params) {
         Object.entries(params).forEach(([clave, valor]) => {
@@ -83,13 +87,23 @@ async function leerRespuesta(response: Response): Promise<unknown> {
         return null;
     }
 
+    const texto = await response.text();
+
+    if (!texto) {
+        return null;
+    }
+
     const contentType = response.headers.get('content-type');
 
     if (contentType && contentType.includes('application/json')) {
-        return await response.json();
+        try {
+            return JSON.parse(texto);
+        } catch {
+            return texto;
+        }
     }
 
-    return await response.text();
+    return texto;
 }
 
 async function httpRequest<T>(
@@ -123,15 +137,25 @@ async function httpRequest<T>(
         }
     }
 
-    const response = await fetch(url, {
-        method: metodo,
-        headers: requestHeaders,
-        body: body !== undefined
-            ? esFormData
-                ? body
-                : JSON.stringify(body)
-            : undefined
-    });
+    let response: Response;
+
+    try {
+        response = await fetch(url, {
+            method: metodo,
+            headers: requestHeaders,
+            body: body !== undefined
+                ? esFormData
+                    ? body
+                    : JSON.stringify(body)
+                : undefined
+        });
+    } catch {
+        throw new ApiError(
+            0,
+            'No se pudo conectar con el servidor.',
+            null
+        );
+    }
 
     const data = await leerRespuesta(response);
 
