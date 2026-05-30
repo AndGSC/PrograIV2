@@ -1,62 +1,128 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
 import EmptyState from '../../componentes/comunes/EmptyState';
+import Loading from '../../componentes/comunes/Loading';
 
-interface PuestoEmpresa {
-    id: number;
-    titulo: string;
-    descripcion: string;
-    salario: string;
-    tipoPublicacion: string;
-    estado: string;
+import {
+    obtenerMisPuestos,
+    desactivarPuesto as desactivarPuestoApi
+} from '../../api/empresaApi';
+
+import { ApiError } from '../../api/http';
+
+import type { PuestoEmpresa } from '../../tipos/puesto';
+
+function obtenerTextoEstado(estado: string) {
+    const estadoNormalizado = estado.trim().toUpperCase();
+
+    if (estadoNormalizado === 'ACTIVO') {
+        return 'Activo';
+    }
+
+    if (estadoNormalizado === 'INACTIVO') {
+        return 'Inactivo';
+    }
+
+    return estado;
+}
+
+function obtenerClaseEstado(estado: string) {
+    const estadoNormalizado = estado.trim().toUpperCase();
+
+    if (estadoNormalizado === 'ACTIVO') {
+        return 'badge badge-success';
+    }
+
+    return 'badge badge-neutral';
+}
+
+function estaInactivo(estado: string) {
+    return estado.trim().toUpperCase() === 'INACTIVO';
+}
+
+function obtenerTextoTipoPublicacion(tipoPublicacion: string) {
+    const tipoNormalizado = tipoPublicacion.trim().toUpperCase();
+
+    if (tipoNormalizado === 'PUBLICA') {
+        return 'Pública';
+    }
+
+    if (tipoNormalizado === 'PRIVADA') {
+        return 'Privada';
+    }
+
+    return tipoPublicacion;
 }
 
 function MisPuestosPage() {
+    const [puestos, setPuestos] = useState<PuestoEmpresa[]>([]);
     const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('success');
+    const [cargando, setCargando] = useState(true);
+    const [desactivandoId, setDesactivandoId] = useState<number | null>(null);
 
-    const [puestos, setPuestos] = useState<PuestoEmpresa[]>([
-        {
-            id: 1,
-            titulo: 'Desarrollador Frontend',
-            descripcion: 'Desarrollo de interfaces web con React.',
-            salario: '₡850 000',
-            tipoPublicacion: 'Pública',
-            estado: 'Activo'
-        },
-        {
-            id: 2,
-            titulo: 'Programador Java Junior',
-            descripcion: 'Desarrollo de servicios backend con Spring.',
-            salario: '₡900 000',
-            tipoPublicacion: 'Privada',
-            estado: 'Activo'
-        },
-        {
-            id: 3,
-            titulo: 'Soporte técnico',
-            descripcion: 'Atención de incidencias y soporte a usuarios.',
-            salario: '₡650 000',
-            tipoPublicacion: 'Pública',
-            estado: 'Inactivo'
-        }
-    ]);
+    useEffect(() => {
+        async function cargarPuestos() {
+            setMensaje('');
+            setTipoMensaje('info');
+            setCargando(true);
 
-    function desactivarPuesto(id: number) {
-        const actualizados = puestos.map((puesto) => {
-            if (puesto.id === id) {
-                return {
-                    ...puesto,
-                    estado: 'Inactivo'
-                };
+            try {
+                const datos = await obtenerMisPuestos();
+                setPuestos(datos || []);
+            } catch (error) {
+                setPuestos([]);
+                setTipoMensaje('danger');
+
+                if (error instanceof ApiError) {
+                    setMensaje(error.message);
+                } else {
+                    setMensaje('No se pudieron cargar los puestos de la empresa.');
+                }
+            } finally {
+                setCargando(false);
             }
+        }
 
-            return puesto;
-        });
+        cargarPuestos();
+    }, []);
 
-        setPuestos(actualizados);
-        setMensaje('Puesto desactivado correctamente.');
+    async function desactivarPuesto(id: number) {
+        setMensaje('');
+        setTipoMensaje('info');
+        setDesactivandoId(id);
+
+        try {
+            await desactivarPuestoApi(id);
+
+            const actualizados = puestos.map((puesto) => {
+                if (puesto.id === id) {
+                    return {
+                        ...puesto,
+                        estado: 'Inactivo'
+                    };
+                }
+
+                return puesto;
+            });
+
+            setPuestos(actualizados);
+            setTipoMensaje('success');
+            setMensaje('Puesto desactivado correctamente.');
+        } catch (error) {
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo desactivar el puesto.');
+            }
+        } finally {
+            setDesactivandoId(null);
+        }
     }
 
     return (
@@ -66,7 +132,7 @@ function MisPuestosPage() {
                 subtitulo="Listado de puestos publicados por la empresa"
             />
 
-            <MessageBox tipo="success" mensaje={mensaje} />
+            <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
 
             <section className="section-block">
                 <div className="actions-row">
@@ -76,7 +142,9 @@ function MisPuestosPage() {
                 </div>
             </section>
 
-            {puestos.length === 0 ? (
+            {cargando ? (
+                <Loading mensaje="Cargando puestos publicados..." />
+            ) : puestos.length === 0 ? (
                 <EmptyState mensaje="No hay puestos publicados por la empresa." />
             ) : (
                 <div className="table-wrapper">
@@ -100,24 +168,18 @@ function MisPuestosPage() {
                                 <td>{puesto.salario}</td>
                                 <td>
                                         <span className="badge badge-info">
-                                            {puesto.tipoPublicacion}
+                                            {obtenerTextoTipoPublicacion(puesto.tipoPublicacion)}
                                         </span>
                                 </td>
                                 <td>
-                                        <span
-                                            className={
-                                                puesto.estado === 'Activo'
-                                                    ? 'badge badge-success'
-                                                    : 'badge badge-neutral'
-                                            }
-                                        >
-                                            {puesto.estado}
+                                        <span className={obtenerClaseEstado(puesto.estado)}>
+                                            {obtenerTextoEstado(puesto.estado)}
                                         </span>
                                 </td>
                                 <td>
                                     <div className="table-actions">
                                         <Link
-                                            to="/empresa/candidatos"
+                                            to={`/empresa/candidatos?puestoId=${puesto.id}`}
                                             className="btn btn-primary btn-sm"
                                         >
                                             Buscar candidatos
@@ -127,9 +189,14 @@ function MisPuestosPage() {
                                             type="button"
                                             className="btn btn-danger btn-sm"
                                             onClick={() => desactivarPuesto(puesto.id)}
-                                            disabled={puesto.estado === 'Inactivo'}
+                                            disabled={
+                                                estaInactivo(puesto.estado) ||
+                                                desactivandoId === puesto.id
+                                            }
                                         >
-                                            Desactivar
+                                            {desactivandoId === puesto.id
+                                                ? 'Desactivando...'
+                                                : 'Desactivar'}
                                         </button>
                                     </div>
                                 </td>

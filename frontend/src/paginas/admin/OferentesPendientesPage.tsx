@@ -1,53 +1,99 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
 import EmptyState from '../../componentes/comunes/EmptyState';
+import Loading from '../../componentes/comunes/Loading';
 
-interface OferentePendiente {
-    id: number;
-    identificacion: string;
-    nombre: string;
-    primerApellido: string;
-    nacionalidad: string;
-    telefono: string;
-    correo: string;
-    residencia: string;
-}
+import {
+    obtenerOferentesPendientes,
+    aprobarOferente as aprobarOferenteApi,
+    rechazarOferente as rechazarOferenteApi
+} from '../../api/adminApi';
+
+import { ApiError } from '../../api/http';
+
+import type { OferentePendiente } from '../../tipos/oferente';
 
 function OferentesPendientesPage() {
+    const [oferentes, setOferentes] = useState<OferentePendiente[]>([]);
     const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('success');
+    const [cargando, setCargando] = useState(true);
+    const [procesandoId, setProcesandoId] = useState<number | null>(null);
 
-    const [oferentes, setOferentes] = useState<OferentePendiente[]>([
-        {
-            id: 1,
-            identificacion: '1-1111-1111',
-            nombre: 'Carlos',
-            primerApellido: 'Mora',
-            nacionalidad: 'Costarricense',
-            telefono: '8888-1111',
-            correo: 'carlos@correo.com',
-            residencia: 'Alajuela'
-        },
-        {
-            id: 2,
-            identificacion: '2-2222-2222',
-            nombre: 'María',
-            primerApellido: 'Soto',
-            nacionalidad: 'Costarricense',
-            telefono: '8888-2222',
-            correo: 'maria@correo.com',
-            residencia: 'Cartago'
+    useEffect(() => {
+        async function cargarOferentesPendientes() {
+            setMensaje('');
+            setTipoMensaje('info');
+            setCargando(true);
+
+            try {
+                const datos = await obtenerOferentesPendientes();
+                setOferentes(datos || []);
+            } catch (error) {
+                setOferentes([]);
+                setTipoMensaje('danger');
+
+                if (error instanceof ApiError) {
+                    setMensaje(error.message);
+                } else {
+                    setMensaje('No se pudieron cargar los oferentes pendientes.');
+                }
+            } finally {
+                setCargando(false);
+            }
         }
-    ]);
 
-    function aprobarOferente(id: number) {
-        setOferentes(oferentes.filter((oferente) => oferente.id !== id));
-        setMensaje('Oferente aprobado correctamente.');
+        cargarOferentesPendientes();
+    }, []);
+
+    async function aprobarOferente(id: number) {
+        setMensaje('');
+        setTipoMensaje('info');
+        setProcesandoId(id);
+
+        try {
+            await aprobarOferenteApi(id);
+
+            setOferentes(oferentes.filter((oferente) => oferente.id !== id));
+            setTipoMensaje('success');
+            setMensaje('Oferente aprobado correctamente.');
+        } catch (error) {
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo aprobar el oferente.');
+            }
+        } finally {
+            setProcesandoId(null);
+        }
     }
 
-    function rechazarOferente(id: number) {
-        setOferentes(oferentes.filter((oferente) => oferente.id !== id));
-        setMensaje('Oferente rechazado correctamente.');
+    async function rechazarOferente(id: number) {
+        setMensaje('');
+        setTipoMensaje('info');
+        setProcesandoId(id);
+
+        try {
+            await rechazarOferenteApi(id);
+
+            setOferentes(oferentes.filter((oferente) => oferente.id !== id));
+            setTipoMensaje('success');
+            setMensaje('Oferente rechazado correctamente.');
+        } catch (error) {
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo rechazar el oferente.');
+            }
+        } finally {
+            setProcesandoId(null);
+        }
     }
 
     return (
@@ -57,9 +103,11 @@ function OferentesPendientesPage() {
                 subtitulo="Revise y autorice las solicitudes de registro de oferentes"
             />
 
-            <MessageBox tipo="success" mensaje={mensaje} />
+            <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
 
-            {oferentes.length === 0 ? (
+            {cargando ? (
+                <Loading mensaje="Cargando oferentes pendientes..." />
+            ) : oferentes.length === 0 ? (
                 <EmptyState mensaje="No hay oferentes pendientes de aprobación." />
             ) : (
                 <div className="table-wrapper">
@@ -93,16 +141,22 @@ function OferentesPendientesPage() {
                                             type="button"
                                             className="btn btn-success btn-sm"
                                             onClick={() => aprobarOferente(oferente.id)}
+                                            disabled={procesandoId === oferente.id}
                                         >
-                                            Aprobar
+                                            {procesandoId === oferente.id
+                                                ? 'Procesando...'
+                                                : 'Aprobar'}
                                         </button>
 
                                         <button
                                             type="button"
                                             className="btn btn-danger btn-sm"
                                             onClick={() => rechazarOferente(oferente.id)}
+                                            disabled={procesandoId === oferente.id}
                                         >
-                                            Rechazar
+                                            {procesandoId === oferente.id
+                                                ? 'Procesando...'
+                                                : 'Rechazar'}
                                         </button>
                                     </div>
                                 </td>

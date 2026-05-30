@@ -1,54 +1,72 @@
 import React, { FormEvent, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
 import EmptyState from '../../componentes/comunes/EmptyState';
+import Loading from '../../componentes/comunes/Loading';
 
-interface Candidato {
-    id: number;
-    nombre: string;
-    correo: string;
-    telefono: string;
-    residencia: string;
-    coincidencia: number;
-    habilidades: string[];
-}
+import { buscarCandidatos as buscarCandidatosApi } from '../../api/empresaApi';
+import { ApiError } from '../../api/http';
+
+import type { Candidato } from '../../tipos/candidato';
 
 function BuscarCandidatosPage() {
+    const [searchParams] = useSearchParams();
+
+    const puestoIdParam = searchParams.get('puestoId');
+    const puestoId = puestoIdParam ? Number(puestoIdParam) : undefined;
+
     const [palabraClave, setPalabraClave] = useState('');
     const [nivel, setNivel] = useState('');
     const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('info');
+    const [cargando, setCargando] = useState(false);
+    const [busquedaRealizada, setBusquedaRealizada] = useState(false);
+    const [candidatos, setCandidatos] = useState<Candidato[]>([]);
 
-    const candidatos: Candidato[] = [
-        {
-            id: 1,
-            nombre: 'Carlos Mora',
-            correo: 'carlos@correo.com',
-            telefono: '8888-1111',
-            residencia: 'Alajuela',
-            coincidencia: 85,
-            habilidades: ['Java - Intermedio', 'Spring - Básico', 'MySQL - Básico']
-        },
-        {
-            id: 2,
-            nombre: 'María Soto',
-            correo: 'maria@correo.com',
-            telefono: '8888-2222',
-            residencia: 'Cartago',
-            coincidencia: 92,
-            habilidades: ['React - Intermedio', 'CSS - Avanzado', 'JavaScript - Intermedio']
-        }
-    ];
-
-    function buscarCandidatos(event: FormEvent<HTMLFormElement>) {
+    async function buscarCandidatos(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        setMensaje('La búsqueda de candidatos se conectará luego con el backend REST.');
+
+        setMensaje('');
+        setTipoMensaje('info');
+        setCargando(true);
+        setBusquedaRealizada(true);
+
+        try {
+            const resultados = await buscarCandidatosApi({
+                palabraClave,
+                nivel,
+                puestoId
+            });
+
+            setCandidatos(resultados || []);
+
+            if (!resultados || resultados.length === 0) {
+                setTipoMensaje('info');
+                setMensaje('No se encontraron candidatos con los criterios indicados.');
+            }
+        } catch (error) {
+            setCandidatos([]);
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo realizar la búsqueda de candidatos.');
+            }
+        } finally {
+            setCargando(false);
+        }
     }
 
     function limpiarBusqueda() {
         setPalabraClave('');
         setNivel('');
         setMensaje('');
+        setTipoMensaje('info');
+        setCandidatos([]);
+        setBusquedaRealizada(false);
     }
 
     return (
@@ -58,7 +76,15 @@ function BuscarCandidatosPage() {
                 subtitulo="Busque oferentes según habilidades y nivel de coincidencia"
             />
 
-            <MessageBox tipo="info" mensaje={mensaje} />
+            <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
+
+            {puestoId && (
+                <section className="section-block">
+                    <p className="text-muted mb-0">
+                        La búsqueda se realizará tomando como referencia el puesto seleccionado.
+                    </p>
+                </section>
+            )}
 
             <section className="filters-card">
                 <form onSubmit={buscarCandidatos}>
@@ -71,6 +97,7 @@ function BuscarCandidatosPage() {
                                 value={palabraClave}
                                 onChange={(event) => setPalabraClave(event.target.value)}
                                 placeholder="Ejemplo: Java, React, SQL"
+                                disabled={cargando}
                             />
                         </div>
 
@@ -80,6 +107,7 @@ function BuscarCandidatosPage() {
                                 id="nivel"
                                 value={nivel}
                                 onChange={(event) => setNivel(event.target.value)}
+                                disabled={cargando}
                             >
                                 <option value="">Todos</option>
                                 <option value="BASICO">Básico</option>
@@ -89,8 +117,12 @@ function BuscarCandidatosPage() {
                         </div>
 
                         <div className="form-group">
-                            <button type="submit" className="btn btn-primary w-100">
-                                Buscar
+                            <button
+                                type="submit"
+                                className="btn btn-primary w-100"
+                                disabled={cargando}
+                            >
+                                {cargando ? 'Buscando...' : 'Buscar'}
                             </button>
                         </div>
 
@@ -99,6 +131,7 @@ function BuscarCandidatosPage() {
                                 type="button"
                                 className="btn btn-secondary w-100"
                                 onClick={limpiarBusqueda}
+                                disabled={cargando}
                             >
                                 Limpiar
                             </button>
@@ -107,57 +140,74 @@ function BuscarCandidatosPage() {
                 </form>
             </section>
 
-            <section className="section-block">
-                <div className="search-results-header">
-                    <h2 className="section-title mb-0">Resultados</h2>
-                    <span className="text-muted">{candidatos.length} candidatos encontrados</span>
-                </div>
+            {cargando ? (
+                <Loading mensaje="Buscando candidatos..." />
+            ) : (
+                <section className="section-block">
+                    <div className="search-results-header">
+                        <h2 className="section-title mb-0">Resultados</h2>
 
-                {candidatos.length === 0 ? (
-                    <EmptyState mensaje="No se encontraron candidatos con los criterios indicados." />
-                ) : (
-                    <div className="company-grid">
-                        {candidatos.map((candidato) => (
-                            <article className="company-card" key={candidato.id}>
-                                <h3 className="company-name">{candidato.nombre}</h3>
-
-                                <p className="company-meta">
-                                    <strong>Correo:</strong> {candidato.correo}
-                                </p>
-
-                                <p className="company-meta">
-                                    <strong>Teléfono:</strong> {candidato.telefono}
-                                </p>
-
-                                <p className="company-meta">
-                                    <strong>Residencia:</strong> {candidato.residencia}
-                                </p>
-
-                                <p>
-                                    <span className="badge badge-success">
-                                        {candidato.coincidencia}% de coincidencia
-                                    </span>
-                                </p>
-
-                                <ul className="simple-list">
-                                    {candidato.habilidades.map((habilidad, index) => (
-                                        <li key={index}>{habilidad}</li>
-                                    ))}
-                                </ul>
-
-                                <div className="mt-2">
-                                    <Link
-                                        to={`/empresa/candidatos/${candidato.id}`}
-                                        className="btn btn-primary"
-                                    >
-                                        Ver detalle
-                                    </Link>
-                                </div>
-                            </article>
-                        ))}
+                        {busquedaRealizada && (
+                            <span className="text-muted">
+                                {candidatos.length} candidatos encontrados
+                            </span>
+                        )}
                     </div>
-                )}
-            </section>
+
+                    {!busquedaRealizada ? (
+                        <EmptyState mensaje="Ingrese criterios de búsqueda y presione el botón Buscar." />
+                    ) : candidatos.length === 0 ? (
+                        <EmptyState mensaje="No se encontraron candidatos con los criterios indicados." />
+                    ) : (
+                        <div className="company-grid">
+                            {candidatos.map((candidato) => (
+                                <article className="company-card" key={candidato.id}>
+                                    <h3 className="company-name">{candidato.nombre}</h3>
+
+                                    <p className="company-meta">
+                                        <strong>Correo:</strong> {candidato.correo}
+                                    </p>
+
+                                    <p className="company-meta">
+                                        <strong>Teléfono:</strong> {candidato.telefono}
+                                    </p>
+
+                                    <p className="company-meta">
+                                        <strong>Residencia:</strong> {candidato.residencia}
+                                    </p>
+
+                                    <p>
+                                        <span className="badge badge-success">
+                                            {candidato.coincidencia}% de coincidencia
+                                        </span>
+                                    </p>
+
+                                    {candidato.habilidades && candidato.habilidades.length > 0 ? (
+                                        <ul className="simple-list">
+                                            {candidato.habilidades.map((habilidad, index) => (
+                                                <li key={index}>{habilidad}</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-muted">
+                                            No hay habilidades registradas.
+                                        </p>
+                                    )}
+
+                                    <div className="mt-2">
+                                        <Link
+                                            to={`/empresa/candidatos/${candidato.id}`}
+                                            className="btn btn-primary"
+                                        >
+                                            Ver detalle
+                                        </Link>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
+                </section>
+            )}
         </>
     );
 }

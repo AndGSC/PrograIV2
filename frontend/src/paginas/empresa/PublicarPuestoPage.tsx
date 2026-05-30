@@ -1,7 +1,30 @@
 import React, { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
+import Loading from '../../componentes/comunes/Loading';
+
+import { publicarPuesto as publicarPuestoApi } from '../../api/empresaApi';
+import { ApiError } from '../../api/http';
+
+import type { RequisitoPuesto } from '../../tipos/puesto';
+
+function obtenerTextoNivel(nivel: string) {
+    if (nivel === 'BASICO') {
+        return 'Básico';
+    }
+
+    if (nivel === 'INTERMEDIO') {
+        return 'Intermedio';
+    }
+
+    if (nivel === 'AVANZADO') {
+        return 'Avanzado';
+    }
+
+    return nivel;
+}
 
 function PublicarPuestoPage() {
     const [titulo, setTitulo] = useState('');
@@ -10,32 +33,53 @@ function PublicarPuestoPage() {
     const [tipoPublicacion, setTipoPublicacion] = useState('PUBLICA');
     const [caracteristica, setCaracteristica] = useState('');
     const [nivel, setNivel] = useState('');
-    const [requisitos, setRequisitos] = useState<string[]>([]);
+    const [requisitos, setRequisitos] = useState<RequisitoPuesto[]>([]);
+
     const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('info');
+    const [cargando, setCargando] = useState(false);
 
     function agregarRequisito() {
         if (caracteristica.trim() === '' || nivel.trim() === '') {
+            setTipoMensaje('warning');
             setMensaje('Debe indicar una característica y un nivel.');
             return;
         }
 
-        const nuevoRequisito = `${caracteristica} - ${nivel}`;
+        const caracteristicaLimpia = caracteristica.trim();
+
+        const requisitoDuplicado = requisitos.some((requisito) => {
+            return (
+                requisito.caracteristica.toLowerCase() === caracteristicaLimpia.toLowerCase() &&
+                requisito.nivel === nivel
+            );
+        });
+
+        if (requisitoDuplicado) {
+            setTipoMensaje('warning');
+            setMensaje('Ese requisito ya fue agregado.');
+            return;
+        }
+
+        const nuevoRequisito: RequisitoPuesto = {
+            caracteristica: caracteristicaLimpia,
+            nivel
+        };
 
         setRequisitos([...requisitos, nuevoRequisito]);
         setCaracteristica('');
         setNivel('');
         setMensaje('');
+        setTipoMensaje('info');
     }
 
     function eliminarRequisito(indice: number) {
         setRequisitos(requisitos.filter((_, index) => index !== indice));
+        setMensaje('');
+        setTipoMensaje('info');
     }
 
-    function publicarPuesto(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-
-        setMensaje('El puesto se conectará luego con el backend REST.');
-
+    function limpiarFormulario() {
         setTitulo('');
         setDescripcion('');
         setSalario('');
@@ -43,6 +87,47 @@ function PublicarPuestoPage() {
         setCaracteristica('');
         setNivel('');
         setRequisitos([]);
+        setMensaje('');
+        setTipoMensaje('info');
+    }
+
+    async function publicarPuesto(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        if (requisitos.length === 0) {
+            setTipoMensaje('warning');
+            setMensaje('Debe agregar al menos una característica requerida.');
+            return;
+        }
+
+        setMensaje('');
+        setTipoMensaje('info');
+        setCargando(true);
+
+        try {
+            await publicarPuestoApi({
+                titulo,
+                descripcion,
+                salario,
+                tipoPublicacion,
+                requisitos
+            });
+
+            limpiarFormulario();
+
+            setTipoMensaje('success');
+            setMensaje('Puesto publicado correctamente.');
+        } catch (error) {
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo publicar el puesto.');
+            }
+        } finally {
+            setCargando(false);
+        }
     }
 
     return (
@@ -52,7 +137,11 @@ function PublicarPuestoPage() {
                 subtitulo="Registre un nuevo puesto disponible para la empresa"
             />
 
-            <MessageBox tipo="info" mensaje={mensaje} />
+            <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
+
+            {cargando && (
+                <Loading mensaje="Publicando puesto..." />
+            )}
 
             <div className="form-wrapper">
                 <form className="form-card" onSubmit={publicarPuesto}>
@@ -65,6 +154,7 @@ function PublicarPuestoPage() {
                             onChange={(event) => setTitulo(event.target.value)}
                             placeholder="Ejemplo: Desarrollador Frontend"
                             required
+                            disabled={cargando}
                         />
                     </div>
 
@@ -76,6 +166,7 @@ function PublicarPuestoPage() {
                             onChange={(event) => setDescripcion(event.target.value)}
                             placeholder="Describa las funciones principales del puesto"
                             required
+                            disabled={cargando}
                         />
                     </div>
 
@@ -89,6 +180,7 @@ function PublicarPuestoPage() {
                                 onChange={(event) => setSalario(event.target.value)}
                                 placeholder="Ejemplo: 850000"
                                 required
+                                disabled={cargando}
                             />
                         </div>
 
@@ -98,6 +190,7 @@ function PublicarPuestoPage() {
                                 id="tipoPublicacion"
                                 value={tipoPublicacion}
                                 onChange={(event) => setTipoPublicacion(event.target.value)}
+                                disabled={cargando}
                             >
                                 <option value="PUBLICA">Pública</option>
                                 <option value="PRIVADA">Privada</option>
@@ -107,7 +200,9 @@ function PublicarPuestoPage() {
 
                     <div className="panel mt-2">
                         <div className="panel-header">
-                            <h2 className="section-title mb-0">Características requeridas</h2>
+                            <h2 className="section-title mb-0">
+                                Características requeridas
+                            </h2>
                         </div>
 
                         <div className="form-row">
@@ -119,6 +214,7 @@ function PublicarPuestoPage() {
                                     value={caracteristica}
                                     onChange={(event) => setCaracteristica(event.target.value)}
                                     placeholder="Ejemplo: Java, React, SQL"
+                                    disabled={cargando}
                                 />
                             </div>
 
@@ -128,11 +224,12 @@ function PublicarPuestoPage() {
                                     id="nivel"
                                     value={nivel}
                                     onChange={(event) => setNivel(event.target.value)}
+                                    disabled={cargando}
                                 >
                                     <option value="">Seleccione</option>
-                                    <option value="Básico">Básico</option>
-                                    <option value="Intermedio">Intermedio</option>
-                                    <option value="Avanzado">Avanzado</option>
+                                    <option value="BASICO">Básico</option>
+                                    <option value="INTERMEDIO">Intermedio</option>
+                                    <option value="AVANZADO">Avanzado</option>
                                 </select>
                             </div>
                         </div>
@@ -142,6 +239,7 @@ function PublicarPuestoPage() {
                                 type="button"
                                 className="btn btn-secondary"
                                 onClick={agregarRequisito}
+                                disabled={cargando}
                             >
                                 Agregar requisito
                             </button>
@@ -157,12 +255,15 @@ function PublicarPuestoPage() {
                                     {requisitos.map((requisito, index) => (
                                         <li key={index}>
                                             <div className="search-results-header mb-0">
-                                                <span>{requisito}</span>
+                                                <span>
+                                                    {requisito.caracteristica} - {obtenerTextoNivel(requisito.nivel)}
+                                                </span>
 
                                                 <button
                                                     type="button"
                                                     className="btn btn-danger btn-sm"
                                                     onClick={() => eliminarRequisito(index)}
+                                                    disabled={cargando}
                                                 >
                                                     Eliminar
                                                 </button>
@@ -175,11 +276,24 @@ function PublicarPuestoPage() {
                     </div>
 
                     <div className="form-actions mt-3">
-                        <button type="submit" className="btn btn-primary">
-                            Publicar puesto
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            disabled={cargando}
+                        >
+                            {cargando ? 'Publicando...' : 'Publicar puesto'}
                         </button>
 
-                        <Link to="/empresa/puestos" className="btn btn-secondary">
+                        <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={limpiarFormulario}
+                            disabled={cargando}
+                        >
+                            Limpiar
+                        </button>
+
+                        <Link to="/empresa/puestos" className="btn btn-outline-dark">
                             Volver
                         </Link>
                     </div>

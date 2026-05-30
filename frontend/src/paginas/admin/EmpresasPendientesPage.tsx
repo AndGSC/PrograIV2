@@ -1,47 +1,99 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
 import EmptyState from '../../componentes/comunes/EmptyState';
+import Loading from '../../componentes/comunes/Loading';
 
-interface EmpresaPendiente {
-    id: number;
-    nombre: string;
-    localizacion: string;
-    correo: string;
-    telefono: string;
-    descripcion: string;
-}
+import {
+    obtenerEmpresasPendientes,
+    aprobarEmpresa as aprobarEmpresaApi,
+    rechazarEmpresa as rechazarEmpresaApi
+} from '../../api/adminApi';
+
+import { ApiError } from '../../api/http';
+
+import type { EmpresaPendiente } from '../../tipos/empresa';
 
 function EmpresasPendientesPage() {
+    const [empresas, setEmpresas] = useState<EmpresaPendiente[]>([]);
     const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('success');
+    const [cargando, setCargando] = useState(true);
+    const [procesandoId, setProcesandoId] = useState<number | null>(null);
 
-    const [empresas, setEmpresas] = useState<EmpresaPendiente[]>([
-        {
-            id: 1,
-            nombre: 'Empresa Demo',
-            localizacion: 'San José',
-            correo: 'empresa@demo.com',
-            telefono: '2222-1111',
-            descripcion: 'Empresa dedicada al desarrollo de soluciones tecnológicas.'
-        },
-        {
-            id: 2,
-            nombre: 'Servicios Profesionales CR',
-            localizacion: 'Heredia',
-            correo: 'contacto@servicioscr.com',
-            telefono: '2266-4455',
-            descripcion: 'Empresa enfocada en contratación de personal especializado.'
+    useEffect(() => {
+        async function cargarEmpresasPendientes() {
+            setMensaje('');
+            setTipoMensaje('info');
+            setCargando(true);
+
+            try {
+                const datos = await obtenerEmpresasPendientes();
+                setEmpresas(datos || []);
+            } catch (error) {
+                setEmpresas([]);
+                setTipoMensaje('danger');
+
+                if (error instanceof ApiError) {
+                    setMensaje(error.message);
+                } else {
+                    setMensaje('No se pudieron cargar las empresas pendientes.');
+                }
+            } finally {
+                setCargando(false);
+            }
         }
-    ]);
 
-    function aprobarEmpresa(id: number) {
-        setEmpresas(empresas.filter((empresa) => empresa.id !== id));
-        setMensaje('Empresa aprobada correctamente.');
+        cargarEmpresasPendientes();
+    }, []);
+
+    async function aprobarEmpresa(id: number) {
+        setMensaje('');
+        setTipoMensaje('info');
+        setProcesandoId(id);
+
+        try {
+            await aprobarEmpresaApi(id);
+
+            setEmpresas(empresas.filter((empresa) => empresa.id !== id));
+            setTipoMensaje('success');
+            setMensaje('Empresa aprobada correctamente.');
+        } catch (error) {
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo aprobar la empresa.');
+            }
+        } finally {
+            setProcesandoId(null);
+        }
     }
 
-    function rechazarEmpresa(id: number) {
-        setEmpresas(empresas.filter((empresa) => empresa.id !== id));
-        setMensaje('Empresa rechazada correctamente.');
+    async function rechazarEmpresa(id: number) {
+        setMensaje('');
+        setTipoMensaje('info');
+        setProcesandoId(id);
+
+        try {
+            await rechazarEmpresaApi(id);
+
+            setEmpresas(empresas.filter((empresa) => empresa.id !== id));
+            setTipoMensaje('success');
+            setMensaje('Empresa rechazada correctamente.');
+        } catch (error) {
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo rechazar la empresa.');
+            }
+        } finally {
+            setProcesandoId(null);
+        }
     }
 
     return (
@@ -51,9 +103,11 @@ function EmpresasPendientesPage() {
                 subtitulo="Revise y autorice las solicitudes de registro de empresas"
             />
 
-            <MessageBox tipo="success" mensaje={mensaje} />
+            <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
 
-            {empresas.length === 0 ? (
+            {cargando ? (
+                <Loading mensaje="Cargando empresas pendientes..." />
+            ) : empresas.length === 0 ? (
                 <EmptyState mensaje="No hay empresas pendientes de aprobación." />
             ) : (
                 <div className="table-wrapper">
@@ -83,16 +137,22 @@ function EmpresasPendientesPage() {
                                             type="button"
                                             className="btn btn-success btn-sm"
                                             onClick={() => aprobarEmpresa(empresa.id)}
+                                            disabled={procesandoId === empresa.id}
                                         >
-                                            Aprobar
+                                            {procesandoId === empresa.id
+                                                ? 'Procesando...'
+                                                : 'Aprobar'}
                                         </button>
 
                                         <button
                                             type="button"
                                             className="btn btn-danger btn-sm"
                                             onClick={() => rechazarEmpresa(empresa.id)}
+                                            disabled={procesandoId === empresa.id}
                                         >
-                                            Rechazar
+                                            {procesandoId === empresa.id
+                                                ? 'Procesando...'
+                                                : 'Rechazar'}
                                         </button>
                                     </div>
                                 </td>

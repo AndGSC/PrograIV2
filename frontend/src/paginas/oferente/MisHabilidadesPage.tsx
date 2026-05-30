@@ -1,155 +1,73 @@
-import React, { FormEvent, useState } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import PageHeader from '../../componentes/comunes/PageHeader';
-import MessageBox from '../../componentes/comunes/MessageBox';
-import EmptyState from '../../componentes/comunes/EmptyState';
 
-interface Habilidad {
-    id: number;
-    caracteristica: string;
-    nivel: string;
-}
-
-function MisHabilidadesPage() {
-    const [caracteristica, setCaracteristica] = useState('');
-    const [nivel, setNivel] = useState('');
-    const [mensaje, setMensaje] = useState('');
-
-    const [habilidades, setHabilidades] = useState<Habilidad[]>([
-        {
-            id: 1,
-            caracteristica: 'Java',
-            nivel: 'Intermedio'
-        },
-        {
-            id: 2,
-            caracteristica: 'React',
-            nivel: 'Básico'
-        },
-        {
-            id: 3,
-            caracteristica: 'MySQL',
-            nivel: 'Intermedio'
-        }
-    ]);
-
-    function agregarHabilidad(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-
-        if (caracteristica.trim() === '' || nivel.trim() === '') {
-            setMensaje('Debe indicar una característica y un nivel.');
-            return;
-        }
-
-        const nuevaHabilidad: Habilidad = {
-            id: Date.now(),
-            caracteristica,
-            nivel
-        };
-
-        setHabilidades([...habilidades, nuevaHabilidad]);
-        setCaracteristica('');
-        setNivel('');
-        setMensaje('Habilidad agregada correctamente.');
-    }
-
-    function eliminarHabilidad(id: number) {
-        setHabilidades(habilidades.filter((habilidad) => habilidad.id !== id));
-        setMensaje('Habilidad eliminada correctamente.');
-    }
-
+function DashboardOferentePage() {
     return (
         <>
             <PageHeader
-                titulo="Mis habilidades"
-                subtitulo="Registre o actualice sus características y niveles de dominio"
+                titulo="Dashboard oferente"
+                subtitulo="Panel principal para gestionar habilidades y currículo"
             />
 
-            <MessageBox tipo="success" mensaje={mensaje} />
-
-            <section className="feature-layout">
-                <div className="content-card">
-                    <h2 className="section-title">Habilidades registradas</h2>
-
-                    {habilidades.length === 0 ? (
-                        <EmptyState mensaje="No hay habilidades registradas." />
-                    ) : (
-                        <div className="table-wrapper">
-                            <table className="data-table">
-                                <thead>
-                                <tr>
-                                    <th>Característica</th>
-                                    <th>Nivel</th>
-                                    <th>Acciones</th>
-                                </tr>
-                                </thead>
-
-                                <tbody>
-                                {habilidades.map((habilidad) => (
-                                    <tr key={habilidad.id}>
-                                        <td>{habilidad.caracteristica}</td>
-                                        <td>
-                                                <span className="badge badge-info">
-                                                    {habilidad.nivel}
-                                                </span>
-                                        </td>
-                                        <td>
-                                            <button
-                                                type="button"
-                                                className="btn btn-danger btn-sm"
-                                                onClick={() => eliminarHabilidad(habilidad.id)}
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+            <section className="dashboard-grid">
+                <div className="stat-card">
+                    <h3>Habilidades registradas</h3>
+                    <p>5</p>
                 </div>
 
-                <aside className="form-card">
-                    <h2 className="section-title">Agregar habilidad</h2>
+                <div className="stat-card">
+                    <h3>Currículo</h3>
+                    <p>1</p>
+                </div>
 
-                    <form onSubmit={agregarHabilidad}>
-                        <div className="form-group">
-                            <label htmlFor="caracteristica">Característica</label>
-                            <input
-                                id="caracteristica"
-                                type="text"
-                                value={caracteristica}
-                                onChange={(event) => setCaracteristica(event.target.value)}
-                                placeholder="Ejemplo: Java, React, SQL"
-                                required
-                            />
-                        </div>
+                <div className="stat-card">
+                    <h3>Estado del perfil</h3>
+                    <p>Activo</p>
+                </div>
+            </section>
 
-                        <div className="form-group">
-                            <label htmlFor="nivel">Nivel</label>
-                            <select
-                                id="nivel"
-                                value={nivel}
-                                onChange={(event) => setNivel(event.target.value)}
-                                required
-                            >
-                                <option value="">Seleccione</option>
-                                <option value="Básico">Básico</option>
-                                <option value="Intermedio">Intermedio</option>
-                                <option value="Avanzado">Avanzado</option>
-                            </select>
-                        </div>
+            <section className="section-block mt-3">
+                <div className="content-card">
+                    <h2 className="section-title">Acciones rápidas</h2>
 
-                        <div className="form-actions">
-                            <button type="submit" className="btn btn-primary">
-                                Agregar habilidad
-                            </button>
-                        </div>
-                    </form>
-                </aside>
+                    <div className="quick-links">
+                        <Link to="/oferente/habilidades" className="btn btn-primary">
+                            Gestionar habilidades
+                        </Link>
+
+                        <Link to="/oferente/cv" className="btn btn-secondary">
+                            Subir currículo
+                        </Link>
+
+                        <Link to="/puestos" className="btn btn-outline-dark">
+                            Buscar puestos públicos
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            <section className="section-block">
+                <div className="grid-2-equal">
+                    <div className="info-card">
+                        <h3 className="card-title">Habilidades</h3>
+                        <p className="card-text">
+                            Registre sus características, destrezas y niveles de dominio para que las empresas
+                            puedan encontrar su perfil.
+                        </p>
+                    </div>
+
+                    <div className="info-card">
+                        <h3 className="card-title">Currículo PDF</h3>
+                        <p className="card-text">
+                            Mantenga actualizado su currículo en formato PDF para que las empresas puedan
+                            consultarlo al revisar su perfil.
+                        </p>
+                    </div>
+                </div>
             </section>
         </>
     );
 }
 
-export default MisHabilidadesPage;
+export default DashboardOferentePage;

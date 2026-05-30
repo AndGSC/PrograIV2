@@ -1,54 +1,132 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+
 import PageHeader from '../../componentes/comunes/PageHeader';
 import EmptyState from '../../componentes/comunes/EmptyState';
 import MessageBox from '../../componentes/comunes/MessageBox';
+import Loading from '../../componentes/comunes/Loading';
 
-interface Caracteristica {
-    id: number;
-    nombre: string;
-    categoria: string;
-    estado: string;
+import {
+    obtenerCaracteristicas,
+    desactivarCaracteristica as desactivarCaracteristicaApi
+} from '../../api/adminApi';
+
+import { ApiError } from '../../api/http';
+
+import type { Caracteristica } from '../../tipos/caracteristica';
+
+function obtenerTextoEstado(estado: string) {
+    const estadoNormalizado = estado.trim().toUpperCase();
+
+    if (
+        estadoNormalizado === 'ACTIVA' ||
+        estadoNormalizado === 'ACTIVO' ||
+        estadoNormalizado === 'A'
+    ) {
+        return 'Activa';
+    }
+
+    if (
+        estadoNormalizado === 'INACTIVA' ||
+        estadoNormalizado === 'INACTIVO' ||
+        estadoNormalizado === 'I'
+    ) {
+        return 'Inactiva';
+    }
+
+    return estado;
+}
+
+function obtenerClaseEstado(estado: string) {
+    const estadoNormalizado = estado.trim().toUpperCase();
+
+    if (
+        estadoNormalizado === 'ACTIVA' ||
+        estadoNormalizado === 'ACTIVO' ||
+        estadoNormalizado === 'A'
+    ) {
+        return 'badge badge-success';
+    }
+
+    return 'badge badge-neutral';
+}
+
+function estaInactiva(estado: string) {
+    const estadoNormalizado = estado.trim().toUpperCase();
+
+    return (
+        estadoNormalizado === 'INACTIVA' ||
+        estadoNormalizado === 'INACTIVO' ||
+        estadoNormalizado === 'I'
+    );
 }
 
 function CaracteristicasAdminPage() {
+    const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>([]);
     const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('success');
+    const [cargando, setCargando] = useState(true);
+    const [desactivandoId, setDesactivandoId] = useState<number | null>(null);
 
-    const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>([
-        {
-            id: 1,
-            nombre: 'Java',
-            categoria: 'Lenguajes de programación',
-            estado: 'Activa'
-        },
-        {
-            id: 2,
-            nombre: 'React',
-            categoria: 'Tecnologías Web',
-            estado: 'Activa'
-        },
-        {
-            id: 3,
-            nombre: 'MySQL',
-            categoria: 'Bases de datos',
-            estado: 'Activa'
-        }
-    ]);
+    useEffect(() => {
+        async function cargarCaracteristicas() {
+            setMensaje('');
+            setTipoMensaje('info');
+            setCargando(true);
 
-    function desactivarCaracteristica(id: number) {
-        const actualizadas = caracteristicas.map((caracteristica) => {
-            if (caracteristica.id === id) {
-                return {
-                    ...caracteristica,
-                    estado: 'Inactiva'
-                };
+            try {
+                const datos = await obtenerCaracteristicas();
+                setCaracteristicas(datos || []);
+            } catch (error) {
+                setCaracteristicas([]);
+                setTipoMensaje('danger');
+
+                if (error instanceof ApiError) {
+                    setMensaje(error.message);
+                } else {
+                    setMensaje('No se pudieron cargar las características.');
+                }
+            } finally {
+                setCargando(false);
             }
+        }
 
-            return caracteristica;
-        });
+        cargarCaracteristicas();
+    }, []);
 
-        setCaracteristicas(actualizadas);
-        setMensaje('Característica desactivada correctamente.');
+    async function desactivarCaracteristica(id: number) {
+        setMensaje('');
+        setTipoMensaje('info');
+        setDesactivandoId(id);
+
+        try {
+            await desactivarCaracteristicaApi(id);
+
+            const actualizadas = caracteristicas.map((caracteristica) => {
+                if (caracteristica.id === id) {
+                    return {
+                        ...caracteristica,
+                        estado: 'Inactiva'
+                    };
+                }
+
+                return caracteristica;
+            });
+
+            setCaracteristicas(actualizadas);
+            setTipoMensaje('success');
+            setMensaje('Característica desactivada correctamente.');
+        } catch (error) {
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo desactivar la característica.');
+            }
+        } finally {
+            setDesactivandoId(null);
+        }
     }
 
     return (
@@ -58,7 +136,7 @@ function CaracteristicasAdminPage() {
                 subtitulo="Administre las características que se usarán en puestos y habilidades"
             />
 
-            <MessageBox tipo="success" mensaje={mensaje} />
+            <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
 
             <section className="section-block">
                 <div className="actions-row">
@@ -68,7 +146,9 @@ function CaracteristicasAdminPage() {
                 </div>
             </section>
 
-            {caracteristicas.length === 0 ? (
+            {cargando ? (
+                <Loading mensaje="Cargando características..." />
+            ) : caracteristicas.length === 0 ? (
                 <EmptyState mensaje="No hay características registradas." />
             ) : (
                 <div className="table-wrapper">
@@ -88,14 +168,8 @@ function CaracteristicasAdminPage() {
                                 <td>{caracteristica.nombre}</td>
                                 <td>{caracteristica.categoria}</td>
                                 <td>
-                                        <span
-                                            className={
-                                                caracteristica.estado === 'Activa'
-                                                    ? 'badge badge-success'
-                                                    : 'badge badge-neutral'
-                                            }
-                                        >
-                                            {caracteristica.estado}
+                                        <span className={obtenerClaseEstado(caracteristica.estado)}>
+                                            {obtenerTextoEstado(caracteristica.estado)}
                                         </span>
                                 </td>
                                 <td>
@@ -103,9 +177,14 @@ function CaracteristicasAdminPage() {
                                         type="button"
                                         className="btn btn-danger btn-sm"
                                         onClick={() => desactivarCaracteristica(caracteristica.id)}
-                                        disabled={caracteristica.estado === 'Inactiva'}
+                                        disabled={
+                                            estaInactiva(caracteristica.estado) ||
+                                            desactivandoId === caracteristica.id
+                                        }
                                     >
-                                        Desactivar
+                                        {desactivandoId === caracteristica.id
+                                            ? 'Desactivando...'
+                                            : 'Desactivar'}
                                     </button>
                                 </td>
                             </tr>
