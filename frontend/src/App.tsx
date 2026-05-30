@@ -6,6 +6,8 @@ import AdminLayout from './layouts/AdminLayout';
 import EmpresaLayout from './layouts/EmpresaLayout';
 import OferenteLayout from './layouts/OferenteLayout';
 
+import RoleRoute from './rutas/RoleRoute';
+
 import HomePage from './paginas/publica/HomePage';
 import PuestosPublicosPage from './paginas/publica/PuestosPublicosPage';
 import BuscarPuestosPage from './paginas/publica/BuscarPuestosPage';
@@ -47,7 +49,14 @@ function App() {
             <Route path="/registro-oferente" element={<RegistroOferentePage />} />
           </Route>
 
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route
+              path="/admin"
+              element={
+                <RoleRoute rolesPermitidos={['ROLE_ADMIN']}>
+                  <AdminLayout />
+                </RoleRoute>
+              }
+          >
             <Route index element={<DashboardAdminPage />} />
             <Route path="empresas-pendientes" element={<EmpresasPendientesPage />} />
             <Route path="oferentes-pendientes" element={<OferentesPendientesPage />} />
@@ -56,7 +65,14 @@ function App() {
             <Route path="reportes" element={<ReportesAdminPage />} />
           </Route>
 
-          <Route path="/empresa" element={<EmpresaLayout />}>
+          <Route
+              path="/empresa"
+              element={
+                <RoleRoute rolesPermitidos={['ROLE_EMPRESA']}>
+                  <EmpresaLayout />
+                </RoleRoute>
+              }
+          >
             <Route index element={<DashboardEmpresaPage />} />
             <Route path="puestos" element={<MisPuestosPage />} />
             <Route path="puestos/nuevo" element={<PublicarPuestoPage />} />
@@ -64,7 +80,14 @@ function App() {
             <Route path="candidatos/:id" element={<DetalleCandidatoPage />} />
           </Route>
 
-          <Route path="/oferente" element={<OferenteLayout />}>
+          <Route
+              path="/oferente"
+              element={
+                <RoleRoute rolesPermitidos={['ROLE_OFERENTE']}>
+                  <OferenteLayout />
+                </RoleRoute>
+              }
+          >
             <Route index element={<DashboardOferentePage />} />
             <Route path="habilidades" element={<MisHabilidadesPage />} />
             <Route path="cv" element={<MiCvPage />} />
