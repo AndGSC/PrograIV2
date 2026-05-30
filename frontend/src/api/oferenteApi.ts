@@ -6,33 +6,15 @@ import {
     ENDPOINT_OFERENTE_CV
 } from '../utils/constants';
 
-export interface Habilidad {
-    id: number;
-    caracteristica: string;
-    nivel: string;
-}
+import type {
+    PerfilOferente,
+    CvResponse
+} from '../tipos/oferente';
 
-export interface AgregarHabilidadRequest {
-    caracteristica: string;
-    nivel: string;
-}
-
-export interface CvResponse {
-    nombreArchivo: string;
-    url?: string;
-}
-
-export interface PerfilOferente {
-    identificacion: string;
-    nombre: string;
-    primerApellido: string;
-    nacionalidad: string;
-    telefono: string;
-    correo: string;
-    residencia: string;
-    estado: string;
-    cvDisponible: boolean;
-}
+import type {
+    Habilidad,
+    AgregarHabilidadRequest
+} from '../tipos/caracteristica';
 
 export function obtenerPerfilOferente() {
     return httpGet<PerfilOferente>('/api/oferente/perfil');
@@ -43,11 +25,16 @@ export function obtenerMisHabilidades() {
 }
 
 export function agregarHabilidad(datos: AgregarHabilidadRequest) {
-    return httpPost<Habilidad>(ENDPOINT_OFERENTE_HABILIDADES, datos);
+    return httpPost<Habilidad>(
+        ENDPOINT_OFERENTE_HABILIDADES,
+        datos
+    );
 }
 
 export function eliminarHabilidad(id: number | string) {
-    return httpDelete<void>(`${ENDPOINT_OFERENTE_HABILIDADES}/${id}`);
+    return httpDelete<void>(
+        `${ENDPOINT_OFERENTE_HABILIDADES}/${id}`
+    );
 }
 
 export function obtenerInfoCv() {
@@ -58,7 +45,10 @@ export function subirCv(archivo: File) {
     const formData = new FormData();
     formData.append('archivo', archivo);
 
-    return httpUpload<CvResponse>(ENDPOINT_OFERENTE_CV, formData);
+    return httpUpload<CvResponse>(
+        ENDPOINT_OFERENTE_CV,
+        formData
+    );
 }
 
 export function obtenerUrlCv() {

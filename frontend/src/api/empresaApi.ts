@@ -7,45 +7,16 @@ import {
     ENDPOINT_EMPRESA_CANDIDATOS
 } from '../utils/constants';
 
-export interface PuestoEmpresa {
-    id: number;
-    titulo: string;
-    descripcion: string;
-    salario: string;
-    tipoPublicacion: string;
-    estado: string;
-}
-
-export interface RequisitoPuesto {
-    caracteristica: string;
-    nivel: string;
-}
-
-export interface PublicarPuestoRequest {
-    titulo: string;
-    descripcion: string;
-    salario: string;
-    tipoPublicacion: string;
-    requisitos: RequisitoPuesto[];
-}
+import type {
+    PuestoEmpresa,
+    PublicarPuestoRequest
+} from '../tipos/puesto';
+import type { Candidato } from '../tipos/candidato';
 
 export interface BuscarCandidatosParams extends ParametrosUrl {
     palabraClave?: string;
     nivel?: string;
     puestoId?: number;
-}
-
-export interface Candidato {
-    id: number;
-    identificacion?: string;
-    nombre: string;
-    nacionalidad?: string;
-    telefono: string;
-    correo: string;
-    residencia: string;
-    coincidencia: number;
-    cvDisponible?: boolean;
-    habilidades: string[];
 }
 
 export function obtenerMisPuestos() {

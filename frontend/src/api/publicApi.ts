@@ -8,35 +8,9 @@ import {
     ENDPOINT_BUSCAR_PUESTOS
 } from '../utils/constants';
 
-export interface RegistroEmpresaRequest {
-    nombre: string;
-    localizacion: string;
-    correo: string;
-    telefono: string;
-    descripcion: string;
-    clave: string;
-}
-
-export interface RegistroOferenteRequest {
-    identificacion: string;
-    nombre: string;
-    primerApellido: string;
-    nacionalidad: string;
-    telefono: string;
-    correo: string;
-    residencia: string;
-    clave: string;
-}
-
-export interface PuestoPublico {
-    id: number;
-    empresa: string;
-    puesto: string;
-    salario: string;
-    tipo: string;
-    descripcion?: string;
-    caracteristicas?: string[];
-}
+import type { RegistroEmpresaRequest } from '../tipos/empresa';
+import type { RegistroOferenteRequest } from '../tipos/oferente';
+import type { PuestoPublico } from '../tipos/puesto';
 
 export interface BuscarPuestosParams extends ParametrosUrl {
     textoBusqueda?: string;

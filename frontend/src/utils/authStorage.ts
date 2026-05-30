@@ -8,15 +8,11 @@ import {
     RUTA_ADMIN,
     RUTA_EMPRESA,
     RUTA_OFERENTE,
-    RUTA_HOME,
-    RolUsuario
+    RUTA_HOME
 } from './constants';
 
-export interface SesionUsuario {
-    token: string;
-    rol: string;
-    correo: string;
-}
+import type { RolUsuario } from './constants';
+import type { SesionUsuario } from '../tipos/auth';
 
 export function guardarToken(token: string) {
     localStorage.setItem(STORAGE_TOKEN_KEY, token);
@@ -31,7 +27,7 @@ export function eliminarToken() {
 }
 
 export function guardarRol(rol: string) {
-    localStorage.setItem(STORAGE_ROL_KEY, rol);
+    localStorage.setItem(STORAGE_ROL_KEY, normalizarRol(rol));
 }
 
 export function obtenerRol() {
@@ -98,15 +94,17 @@ export function tieneRol(rolesPermitidos: string[]) {
 }
 
 export function obtenerRutaPorRol(rol: string) {
-    if (rol === ROLE_ADMIN) {
+    const rolNormalizado = normalizarRol(rol);
+
+    if (rolNormalizado === ROLE_ADMIN) {
         return RUTA_ADMIN;
     }
 
-    if (rol === ROLE_EMPRESA) {
+    if (rolNormalizado === ROLE_EMPRESA) {
         return RUTA_EMPRESA;
     }
 
-    if (rol === ROLE_OFERENTE) {
+    if (rolNormalizado === ROLE_OFERENTE) {
         return RUTA_OFERENTE;
     }
 
@@ -114,10 +112,12 @@ export function obtenerRutaPorRol(rol: string) {
 }
 
 export function esRolValido(rol: string) {
+    const rolNormalizado = normalizarRol(rol);
+
     return (
-        rol === ROLE_ADMIN ||
-        rol === ROLE_EMPRESA ||
-        rol === ROLE_OFERENTE
+        rolNormalizado === ROLE_ADMIN ||
+        rolNormalizado === ROLE_EMPRESA ||
+        rolNormalizado === ROLE_OFERENTE
     );
 }
 
