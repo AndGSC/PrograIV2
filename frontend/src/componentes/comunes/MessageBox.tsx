@@ -12,9 +12,17 @@ function MessageBox({ tipo, mensaje }: MessageBoxProps) {
         return null;
     }
 
+    const rolMensaje = tipo === 'danger' || tipo === 'warning'
+        ? 'alert'
+        : 'status';
+
     return (
         <div className="messages-container">
-            <div className={`alert alert-${tipo}`}>
+            <div
+                className={`alert alert-${tipo}`}
+                role={rolMensaje}
+                aria-live="polite"
+            >
                 {mensaje}
             </div>
         </div>

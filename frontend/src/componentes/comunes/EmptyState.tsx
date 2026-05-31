@@ -16,7 +16,11 @@ function EmptyState({ titulo, mensaje, textoBoton, onAccion }: EmptyStateProps) 
 
             {textoBoton && onAccion && (
                 <div className="mt-2">
-                    <button className="btn btn-primary" onClick={onAccion}>
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={onAccion}
+                    >
                         {textoBoton}
                     </button>
                 </div>

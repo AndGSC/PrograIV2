@@ -6,7 +6,7 @@ interface LoadingProps {
 
 function Loading({ mensaje = 'Cargando información...' }: LoadingProps) {
     return (
-        <div className="loading-state">
+        <div className="loading-state" role="status" aria-live="polite">
             <p>{mensaje}</p>
         </div>
     );
