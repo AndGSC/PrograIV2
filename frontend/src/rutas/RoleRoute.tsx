@@ -17,7 +17,7 @@ function RoleRoute({ children, rolesPermitidos }: RoleRouteProps) {
             <Navigate
                 to={RUTA_LOGIN}
                 replace
-                state={{ from: location.pathname }}
+                state={{ from: `${location.pathname}${location.search}` }}
             />
         );
     }

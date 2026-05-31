@@ -16,7 +16,7 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
             <Navigate
                 to={RUTA_LOGIN}
                 replace
-                state={{ from: location.pathname }}
+                state={{ from: `${location.pathname}${location.search}` }}
             />
         );
     }

@@ -10,7 +10,7 @@ function NavAdmin() {
 
     function manejarCerrarSesion() {
         cerrarSesion();
-        navigate(RUTA_LOGIN);
+        navigate(RUTA_LOGIN, { replace: true });
     }
 
     return (
