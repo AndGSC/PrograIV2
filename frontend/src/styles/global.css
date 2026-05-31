@@ -544,7 +544,7 @@ ul {
 
 .filter-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
     gap: 14px;
     align-items: end;
 }
@@ -786,6 +786,12 @@ tbody tr:hover,
 
 .profile-summary {
     display: grid;
+    gap: 12px;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
 }
 
@@ -1096,7 +1102,8 @@ tbody tr:hover,
     .sidebar-layout,
     .feature-layout,
     .filter-grid,
-    .form-row {
+    .form-row,
+    .profile-grid {
         grid-template-columns: 1fr;
     }
 

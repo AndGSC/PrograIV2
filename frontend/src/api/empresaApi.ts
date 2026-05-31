@@ -11,6 +11,7 @@ import type {
     PuestoEmpresa,
     PublicarPuestoRequest
 } from '../tipos/puesto';
+
 import type { Candidato } from '../tipos/candidato';
 
 export interface BuscarCandidatosParams extends ParametrosUrl {
@@ -19,8 +20,16 @@ export interface BuscarCandidatosParams extends ParametrosUrl {
     puestoId?: number;
 }
 
+function obtenerBaseUrlNormalizada() {
+    return API_BASE_URL.endsWith('/')
+        ? API_BASE_URL.slice(0, -1)
+        : API_BASE_URL;
+}
+
 export function obtenerMisPuestos() {
-    return httpGet<PuestoEmpresa[]>(ENDPOINT_EMPRESA_PUESTOS);
+    return httpGet<PuestoEmpresa[]>(
+        ENDPOINT_EMPRESA_PUESTOS
+    );
 }
 
 export function publicarPuesto(datos: PublicarPuestoRequest) {
@@ -56,9 +65,7 @@ export function obtenerDetalleCandidato(id: number | string) {
 }
 
 export function obtenerUrlCurriculoCandidato(id: number | string) {
-    const baseUrlNormalizada = API_BASE_URL.endsWith('/')
-        ? API_BASE_URL.slice(0, -1)
-        : API_BASE_URL;
+    const baseUrlNormalizada = obtenerBaseUrlNormalizada();
 
     return `${baseUrlNormalizada}${ENDPOINT_EMPRESA_CANDIDATOS}/${id}/cv`;
 }

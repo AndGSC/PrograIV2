@@ -1,73 +1,237 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import PageHeader from '../../componentes/comunes/PageHeader';
+import React, { FormEvent, useEffect, useState } from 'react';
 
-function DashboardOferentePage() {
+import PageHeader from '../../componentes/comunes/PageHeader';
+import MessageBox from '../../componentes/comunes/MessageBox';
+import EmptyState from '../../componentes/comunes/EmptyState';
+import Loading from '../../componentes/comunes/Loading';
+import CaracteristicasSelector from '../../componentes/caracteristicas/CaracteristicasSelector';
+
+import {
+    obtenerMisHabilidades,
+    agregarHabilidad as agregarHabilidadApi,
+    eliminarHabilidad as eliminarHabilidadApi
+} from '../../api/oferenteApi';
+
+import { ApiError } from '../../api/http';
+
+import type { Habilidad } from '../../tipos/caracteristica';
+
+function obtenerTextoNivel(nivel: string) {
+    if (nivel === 'BASICO') {
+        return 'Básico';
+    }
+
+    if (nivel === 'INTERMEDIO') {
+        return 'Intermedio';
+    }
+
+    if (nivel === 'AVANZADO') {
+        return 'Avanzado';
+    }
+
+    return nivel;
+}
+
+function MisHabilidadesPage() {
+    const [caracteristica, setCaracteristica] = useState('');
+    const [nivel, setNivel] = useState('');
+    const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('success');
+
+    const [habilidades, setHabilidades] = useState<Habilidad[]>([]);
+    const [cargando, setCargando] = useState(true);
+    const [guardando, setGuardando] = useState(false);
+    const [eliminandoId, setEliminandoId] = useState<number | null>(null);
+
+    useEffect(() => {
+        async function cargarHabilidades() {
+            setMensaje('');
+            setTipoMensaje('info');
+            setCargando(true);
+
+            try {
+                const datos = await obtenerMisHabilidades();
+                setHabilidades(datos || []);
+            } catch (error) {
+                setHabilidades([]);
+                setTipoMensaje('danger');
+
+                if (error instanceof ApiError) {
+                    setMensaje(error.message);
+                } else {
+                    setMensaje('No se pudieron cargar las habilidades.');
+                }
+            } finally {
+                setCargando(false);
+            }
+        }
+
+        cargarHabilidades();
+    }, []);
+
+    async function agregarHabilidad(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        if (caracteristica.trim() === '' || nivel.trim() === '') {
+            setTipoMensaje('warning');
+            setMensaje('Debe indicar una característica y un nivel.');
+            return;
+        }
+
+        const caracteristicaLimpia = caracteristica.trim();
+
+        const habilidadDuplicada = habilidades.some((habilidad) => {
+            return (
+                habilidad.caracteristica.toLowerCase() === caracteristicaLimpia.toLowerCase() &&
+                habilidad.nivel === nivel
+            );
+        });
+
+        if (habilidadDuplicada) {
+            setTipoMensaje('warning');
+            setMensaje('Esa habilidad ya fue registrada.');
+            return;
+        }
+
+        setMensaje('');
+        setTipoMensaje('info');
+        setGuardando(true);
+
+        try {
+            const nuevaHabilidad = await agregarHabilidadApi({
+                caracteristica: caracteristicaLimpia,
+                nivel
+            });
+
+            setHabilidades([...habilidades, nuevaHabilidad]);
+            setCaracteristica('');
+            setNivel('');
+            setTipoMensaje('success');
+            setMensaje('Habilidad agregada correctamente.');
+        } catch (error) {
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo agregar la habilidad.');
+            }
+        } finally {
+            setGuardando(false);
+        }
+    }
+
+    async function eliminarHabilidad(id: number) {
+        setMensaje('');
+        setTipoMensaje('info');
+        setEliminandoId(id);
+
+        try {
+            await eliminarHabilidadApi(id);
+
+            setHabilidades(habilidades.filter((habilidad) => habilidad.id !== id));
+            setTipoMensaje('success');
+            setMensaje('Habilidad eliminada correctamente.');
+        } catch (error) {
+            setTipoMensaje('danger');
+
+            if (error instanceof ApiError) {
+                setMensaje(error.message);
+            } else {
+                setMensaje('No se pudo eliminar la habilidad.');
+            }
+        } finally {
+            setEliminandoId(null);
+        }
+    }
+
     return (
         <>
             <PageHeader
-                titulo="Dashboard oferente"
-                subtitulo="Panel principal para gestionar habilidades y currículo"
+                titulo="Mis habilidades"
+                subtitulo="Registre o actualice sus características y niveles de dominio"
             />
 
-            <section className="dashboard-grid">
-                <div className="stat-card">
-                    <h3>Habilidades registradas</h3>
-                    <p>5</p>
-                </div>
+            <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
 
-                <div className="stat-card">
-                    <h3>Currículo</h3>
-                    <p>1</p>
-                </div>
+            {cargando ? (
+                <Loading mensaje="Cargando habilidades registradas..." />
+            ) : (
+                <section className="feature-layout">
+                    <div className="content-card">
+                        <h2 className="section-title">Habilidades registradas</h2>
 
-                <div className="stat-card">
-                    <h3>Estado del perfil</h3>
-                    <p>Activo</p>
-                </div>
-            </section>
+                        {habilidades.length === 0 ? (
+                            <EmptyState mensaje="No hay habilidades registradas." />
+                        ) : (
+                            <div className="table-wrapper">
+                                <table className="data-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Característica</th>
+                                        <th>Nivel</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                    </thead>
 
-            <section className="section-block mt-3">
-                <div className="content-card">
-                    <h2 className="section-title">Acciones rápidas</h2>
-
-                    <div className="quick-links">
-                        <Link to="/oferente/habilidades" className="btn btn-primary">
-                            Gestionar habilidades
-                        </Link>
-
-                        <Link to="/oferente/cv" className="btn btn-secondary">
-                            Subir currículo
-                        </Link>
-
-                        <Link to="/puestos" className="btn btn-outline-dark">
-                            Buscar puestos públicos
-                        </Link>
+                                    <tbody>
+                                    {habilidades.map((habilidad) => (
+                                        <tr key={habilidad.id}>
+                                            <td>{habilidad.caracteristica}</td>
+                                            <td>
+                                                    <span className="badge badge-info">
+                                                        {obtenerTextoNivel(habilidad.nivel)}
+                                                    </span>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-danger btn-sm"
+                                                    onClick={() => eliminarHabilidad(habilidad.id)}
+                                                    disabled={eliminandoId === habilidad.id || guardando}
+                                                >
+                                                    {eliminandoId === habilidad.id
+                                                        ? 'Eliminando...'
+                                                        : 'Eliminar'}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
-                </div>
-            </section>
 
-            <section className="section-block">
-                <div className="grid-2-equal">
-                    <div className="info-card">
-                        <h3 className="card-title">Habilidades</h3>
-                        <p className="card-text">
-                            Registre sus características, destrezas y niveles de dominio para que las empresas
-                            puedan encontrar su perfil.
-                        </p>
-                    </div>
+                    <aside className="form-card">
+                        <h2 className="section-title">Agregar habilidad</h2>
 
-                    <div className="info-card">
-                        <h3 className="card-title">Currículo PDF</h3>
-                        <p className="card-text">
-                            Mantenga actualizado su currículo en formato PDF para que las empresas puedan
-                            consultarlo al revisar su perfil.
-                        </p>
-                    </div>
-                </div>
-            </section>
+                        <form onSubmit={agregarHabilidad}>
+                            <CaracteristicasSelector
+                                caracteristica={caracteristica}
+                                nivel={nivel}
+                                onCaracteristicaChange={setCaracteristica}
+                                onNivelChange={setNivel}
+                                disabled={guardando}
+                                idPrefijo="habilidad-oferente"
+                                placeholder="Ejemplo: Java, React, SQL"
+                            />
+
+                            <div className="form-actions">
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    disabled={guardando}
+                                >
+                                    {guardando ? 'Agregando...' : 'Agregar habilidad'}
+                                </button>
+                            </div>
+                        </form>
+                    </aside>
+                </section>
+            )}
         </>
     );
 }
 
-export default DashboardOferentePage;
+export default MisHabilidadesPage;

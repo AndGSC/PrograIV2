@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
 import Loading from '../../componentes/comunes/Loading';
+import CaracteristicasSelector from '../../componentes/caracteristicas/CaracteristicasSelector';
 
 import { publicarPuesto as publicarPuestoApi } from '../../api/empresaApi';
 import { ApiError } from '../../api/http';
@@ -205,45 +206,17 @@ function PublicarPuestoPage() {
                             </h2>
                         </div>
 
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="caracteristica">Característica</label>
-                                <input
-                                    id="caracteristica"
-                                    type="text"
-                                    value={caracteristica}
-                                    onChange={(event) => setCaracteristica(event.target.value)}
-                                    placeholder="Ejemplo: Java, React, SQL"
-                                    disabled={cargando}
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="nivel">Nivel requerido</label>
-                                <select
-                                    id="nivel"
-                                    value={nivel}
-                                    onChange={(event) => setNivel(event.target.value)}
-                                    disabled={cargando}
-                                >
-                                    <option value="">Seleccione</option>
-                                    <option value="BASICO">Básico</option>
-                                    <option value="INTERMEDIO">Intermedio</option>
-                                    <option value="AVANZADO">Avanzado</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="form-actions">
-                            <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={agregarRequisito}
-                                disabled={cargando}
-                            >
-                                Agregar requisito
-                            </button>
-                        </div>
+                        <CaracteristicasSelector
+                            caracteristica={caracteristica}
+                            nivel={nivel}
+                            onCaracteristicaChange={setCaracteristica}
+                            onNivelChange={setNivel}
+                            onAgregar={agregarRequisito}
+                            disabled={cargando}
+                            textoBoton="Agregar requisito"
+                            idPrefijo="requisito-puesto"
+                            placeholder="Ejemplo: Java, React, SQL"
+                        />
 
                         <div className="mt-2">
                             {requisitos.length === 0 ? (

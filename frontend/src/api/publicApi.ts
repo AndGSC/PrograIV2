@@ -18,11 +18,19 @@ export interface BuscarPuestosParams extends ParametrosUrl {
 }
 
 export function registrarEmpresa(datos: RegistroEmpresaRequest) {
-    return httpPost<void>(ENDPOINT_REGISTRO_EMPRESA, datos, false);
+    return httpPost<void>(
+        ENDPOINT_REGISTRO_EMPRESA,
+        datos,
+        false
+    );
 }
 
 export function registrarOferente(datos: RegistroOferenteRequest) {
-    return httpPost<void>(ENDPOINT_REGISTRO_OFERENTE, datos, false);
+    return httpPost<void>(
+        ENDPOINT_REGISTRO_OFERENTE,
+        datos,
+        false
+    );
 }
 
 export function obtenerPuestosPublicos() {

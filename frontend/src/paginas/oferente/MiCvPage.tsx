@@ -1,8 +1,9 @@
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
 import Loading from '../../componentes/comunes/Loading';
+import CvUploader from '../../componentes/formularios/CvUploader';
 
 import {
     obtenerInfoCv,
@@ -19,6 +20,7 @@ function MiCvPage() {
     const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('info');
     const [cargando, setCargando] = useState(true);
     const [subiendo, setSubiendo] = useState(false);
+    const [cvUploaderKey, setCvUploaderKey] = useState(0);
 
     useEffect(() => {
         async function cargarInfoCv() {
@@ -51,27 +53,6 @@ function MiCvPage() {
         cargarInfoCv();
     }, []);
 
-    function seleccionarArchivo(event: ChangeEvent<HTMLInputElement>) {
-        const archivoSeleccionado = event.target.files && event.target.files[0];
-
-        if (!archivoSeleccionado) {
-            setArchivo(null);
-            return;
-        }
-
-        if (archivoSeleccionado.type !== 'application/pdf') {
-            setArchivo(null);
-            setTipoMensaje('danger');
-            setMensaje('Solo se permite subir archivos en formato PDF.');
-            event.target.value = '';
-            return;
-        }
-
-        setArchivo(archivoSeleccionado);
-        setTipoMensaje('info');
-        setMensaje(`Archivo seleccionado: ${archivoSeleccionado.name}`);
-    }
-
     async function subirCurriculo(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
@@ -90,6 +71,8 @@ function MiCvPage() {
 
             setNombreArchivoActual(respuesta.nombreArchivo || archivo.name);
             setArchivo(null);
+            setCvUploaderKey((valorActual) => valorActual + 1);
+
             setTipoMensaje('success');
             setMensaje('Currículo actualizado correctamente.');
         } catch (error) {
@@ -103,6 +86,16 @@ function MiCvPage() {
         } finally {
             setSubiendo(false);
         }
+    }
+
+    function manejarArchivoValido(mensajeArchivo: string) {
+        setTipoMensaje('info');
+        setMensaje(mensajeArchivo);
+    }
+
+    function manejarArchivoInvalido(mensajeArchivo: string) {
+        setTipoMensaje('danger');
+        setMensaje(mensajeArchivo);
     }
 
     function verCurriculo() {
@@ -162,42 +155,20 @@ function MiCvPage() {
                     <div className="form-card">
                         <h2 className="section-title">Actualizar currículo</h2>
 
-                        <form onSubmit={subirCurriculo}>
-                            <div className="form-group">
-                                <label htmlFor="cv">Archivo PDF</label>
-                                <input
-                                    id="cv"
-                                    type="file"
-                                    accept="application/pdf"
-                                    onChange={seleccionarArchivo}
-                                    disabled={subiendo}
-                                />
+                        <CvUploader
+                            key={cvUploaderKey}
+                            archivo={archivo}
+                            onArchivoSeleccionado={setArchivo}
+                            onSubmit={subirCurriculo}
+                            onArchivoValido={manejarArchivoValido}
+                            onArchivoInvalido={manejarArchivoInvalido}
+                            disabled={subiendo}
+                            textoBoton={subiendo ? 'Subiendo...' : 'Subir currículo'}
+                        />
 
-                                <p className="file-help">
-                                    Solo se permite subir un archivo en formato PDF.
-                                </p>
-                            </div>
-
-                            {archivo && (
-                                <div className="profile-line">
-                                    <strong>Archivo seleccionado:</strong> {archivo.name}
-                                </div>
-                            )}
-
-                            {subiendo && (
-                                <Loading mensaje="Subiendo currículo..." />
-                            )}
-
-                            <div className="form-actions mt-2">
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary"
-                                    disabled={subiendo}
-                                >
-                                    {subiendo ? 'Subiendo...' : 'Subir currículo'}
-                                </button>
-                            </div>
-                        </form>
+                        {subiendo && (
+                            <Loading mensaje="Subiendo currículo..." />
+                        )}
                     </div>
                 </section>
             )}

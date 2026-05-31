@@ -27,8 +27,12 @@ export class ApiError extends Error {
 
     constructor(status: number, message: string, data?: unknown) {
         super(message);
+
+        this.name = 'ApiError';
         this.status = status;
         this.data = data;
+
+        Object.setPrototypeOf(this, ApiError.prototype);
     }
 }
 
@@ -160,7 +164,7 @@ async function httpRequest<T>(
     const data = await leerRespuesta(response);
 
     if (!response.ok) {
-        if (response.status === 401) {
+        if (response.status === 401 && requiereAuth) {
             cerrarSesion();
 
             if (window.location.pathname !== RUTA_LOGIN) {

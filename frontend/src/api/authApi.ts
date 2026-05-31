@@ -1,5 +1,9 @@
 import { httpPost, httpGet } from './http';
-import { ENDPOINT_LOGIN } from '../utils/constants';
+
+import {
+    ENDPOINT_LOGIN,
+    ENDPOINT_USUARIO_ACTUAL
+} from '../utils/constants';
 
 import type {
     LoginRequest,
@@ -8,9 +12,15 @@ import type {
 } from '../tipos/auth';
 
 export function login(datos: LoginRequest) {
-    return httpPost<LoginResponse>(ENDPOINT_LOGIN, datos, false);
+    return httpPost<LoginResponse>(
+        ENDPOINT_LOGIN,
+        datos,
+        false
+    );
 }
 
 export function obtenerUsuarioActual() {
-    return httpGet<UsuarioActual>('/api/auth/me');
+    return httpGet<UsuarioActual>(
+        ENDPOINT_USUARIO_ACTUAL
+    );
 }

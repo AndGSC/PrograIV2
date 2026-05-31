@@ -1,10 +1,11 @@
 import React, { FormEvent, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
 import EmptyState from '../../componentes/comunes/EmptyState';
 import Loading from '../../componentes/comunes/Loading';
+import CandidatoCard from '../../componentes/candidatos/CandidatoCard';
 
 import { buscarCandidatos as buscarCandidatosApi } from '../../api/empresaApi';
 import { ApiError } from '../../api/http';
@@ -161,48 +162,10 @@ function BuscarCandidatosPage() {
                     ) : (
                         <div className="company-grid">
                             {candidatos.map((candidato) => (
-                                <article className="company-card" key={candidato.id}>
-                                    <h3 className="company-name">{candidato.nombre}</h3>
-
-                                    <p className="company-meta">
-                                        <strong>Correo:</strong> {candidato.correo}
-                                    </p>
-
-                                    <p className="company-meta">
-                                        <strong>Teléfono:</strong> {candidato.telefono}
-                                    </p>
-
-                                    <p className="company-meta">
-                                        <strong>Residencia:</strong> {candidato.residencia}
-                                    </p>
-
-                                    <p>
-                                        <span className="badge badge-success">
-                                            {candidato.coincidencia}% de coincidencia
-                                        </span>
-                                    </p>
-
-                                    {candidato.habilidades && candidato.habilidades.length > 0 ? (
-                                        <ul className="simple-list">
-                                            {candidato.habilidades.map((habilidad, index) => (
-                                                <li key={index}>{habilidad}</li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <p className="text-muted">
-                                            No hay habilidades registradas.
-                                        </p>
-                                    )}
-
-                                    <div className="mt-2">
-                                        <Link
-                                            to={`/empresa/candidatos/${candidato.id}`}
-                                            className="btn btn-primary"
-                                        >
-                                            Ver detalle
-                                        </Link>
-                                    </div>
-                                </article>
+                                <CandidatoCard
+                                    key={candidato.id}
+                                    candidato={candidato}
+                                />
                             ))}
                         </div>
                     )}

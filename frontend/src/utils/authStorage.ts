@@ -80,6 +80,7 @@ export function cerrarSesion() {
 
 export function estaAutenticado() {
     const token = obtenerToken();
+
     return token !== null && token.trim() !== '';
 }
 
@@ -122,17 +123,19 @@ export function esRolValido(rol: string) {
 }
 
 export function normalizarRol(rol: string): RolUsuario | string {
-    if (rol === 'ADMIN') {
+    const rolNormalizado = rol.trim().toUpperCase();
+
+    if (rolNormalizado === 'ADMIN' || rolNormalizado === ROLE_ADMIN) {
         return ROLE_ADMIN;
     }
 
-    if (rol === 'EMPRESA') {
+    if (rolNormalizado === 'EMPRESA' || rolNormalizado === ROLE_EMPRESA) {
         return ROLE_EMPRESA;
     }
 
-    if (rol === 'OFERENTE') {
+    if (rolNormalizado === 'OFERENTE' || rolNormalizado === ROLE_OFERENTE) {
         return ROLE_OFERENTE;
     }
 
-    return rol;
+    return rolNormalizado;
 }

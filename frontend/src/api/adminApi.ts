@@ -3,19 +3,24 @@ import { httpGet, httpPost, httpPatch } from './http';
 import {
     ENDPOINT_ADMIN_EMPRESAS_PENDIENTES,
     ENDPOINT_ADMIN_OFERENTES_PENDIENTES,
-    ENDPOINT_ADMIN_CARACTERISTICAS
+    ENDPOINT_ADMIN_CARACTERISTICAS,
+    ENDPOINT_ADMIN_REPORTES
 } from '../utils/constants';
 
 import type { EmpresaPendiente } from '../tipos/empresa';
 import type { OferentePendiente } from '../tipos/oferente';
+
 import type {
     Caracteristica,
     CrearCaracteristicaRequest
 } from '../tipos/caracteristica';
+
 import type { ReporteAdmin } from '../tipos/api';
 
 export function obtenerEmpresasPendientes() {
-    return httpGet<EmpresaPendiente[]>(ENDPOINT_ADMIN_EMPRESAS_PENDIENTES);
+    return httpGet<EmpresaPendiente[]>(
+        ENDPOINT_ADMIN_EMPRESAS_PENDIENTES
+    );
 }
 
 export function aprobarEmpresa(id: number | string) {
@@ -31,7 +36,9 @@ export function rechazarEmpresa(id: number | string) {
 }
 
 export function obtenerOferentesPendientes() {
-    return httpGet<OferentePendiente[]>(ENDPOINT_ADMIN_OFERENTES_PENDIENTES);
+    return httpGet<OferentePendiente[]>(
+        ENDPOINT_ADMIN_OFERENTES_PENDIENTES
+    );
 }
 
 export function aprobarOferente(id: number | string) {
@@ -47,7 +54,9 @@ export function rechazarOferente(id: number | string) {
 }
 
 export function obtenerCaracteristicas() {
-    return httpGet<Caracteristica[]>(ENDPOINT_ADMIN_CARACTERISTICAS);
+    return httpGet<Caracteristica[]>(
+        ENDPOINT_ADMIN_CARACTERISTICAS
+    );
 }
 
 export function crearCaracteristica(datos: CrearCaracteristicaRequest) {
@@ -64,5 +73,7 @@ export function desactivarCaracteristica(id: number | string) {
 }
 
 export function obtenerReportesAdmin() {
-    return httpGet<ReporteAdmin>('/api/admin/reportes');
+    return httpGet<ReporteAdmin>(
+        ENDPOINT_ADMIN_REPORTES
+    );
 }

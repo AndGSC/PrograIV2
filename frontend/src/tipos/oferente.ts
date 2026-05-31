@@ -33,6 +33,6 @@ export interface PerfilOferente {
 }
 
 export interface CvResponse {
-    nombreArchivo: string;
+    nombreArchivo?: string;
     url?: string;
 }
