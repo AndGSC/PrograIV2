@@ -13,8 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 @RestController
-@RequestMapping("/api/cv")
+@RequestMapping("/api/legacy/cv")
 @CrossOrigin(origins = "*")
 public class CVController {
 
@@ -203,7 +204,7 @@ public class CVController {
                     "<body>\n" +
                     "    <div class=\"header\">\n" +
                     "        <h1>Currículo del Oferente #" + idOferente + "</h1>\n" +
-                    "        <a href=\"/api/cv/descargar/" + idOferente + "\" class=\"download-btn\">Descargar CV</a>\n" +
+                    "        <a href=\"/api/legacy/cv/descargar/" + idOferente + "\" class=\"download-btn\">Descargar CV</a>\n" +
                     "    </div>\n" +
                     "    <iframe class=\"viewer\" src=\"" + urlVisualizador + "\"></iframe>\n" +
                     "</body>\n" +

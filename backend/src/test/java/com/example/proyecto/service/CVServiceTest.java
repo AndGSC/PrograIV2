@@ -50,7 +50,7 @@ class CVServiceTest {
 
         String url = cvService.guardarCV(1, archivo);
 
-        assertEquals("http://localhost:8080/api/cv/descargar/1", url);
+        assertEquals("http://localhost:8080/api/legacy/cv/descargar/1", url);
         assertArrayEquals(PDF_BYTES, oferente.getCurriculumPdf());
         verify(oferenteRepository).save(oferente);
     }

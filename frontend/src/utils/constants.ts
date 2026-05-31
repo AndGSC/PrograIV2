@@ -7,9 +7,9 @@ export const STORAGE_TOKEN_KEY = 'token';
 export const STORAGE_ROL_KEY = 'rol';
 export const STORAGE_CORREO_KEY = 'correo';
 
-export const ROLE_ADMIN = 'ROLE_ADMIN';
-export const ROLE_EMPRESA = 'ROLE_EMPRESA';
-export const ROLE_OFERENTE = 'ROLE_OFERENTE';
+export const ROLE_ADMIN = 'rol_ADMIN';
+export const ROLE_EMPRESA = 'rol_EMPRESA';
+export const ROLE_OFERENTE = 'rol_OFERENTE';
 
 export type RolUsuario =
     | typeof ROLE_ADMIN
@@ -42,6 +42,7 @@ export const ENDPOINT_EMPRESA_CANDIDATOS = `${API_PREFIX}/empresa/candidatos`;
 export const ENDPOINT_OFERENTE_PERFIL = `${API_PREFIX}/oferente/perfil`;
 export const ENDPOINT_OFERENTE_HABILIDADES = `${API_PREFIX}/oferente/habilidades`;
 export const ENDPOINT_OFERENTE_CV = `${API_PREFIX}/oferente/cv`;
+export const ENDPOINT_OFERENTE_CV_ARCHIVO = `${API_PREFIX}/oferente/cv/archivo`;
 
 export const MENSAJE_ERROR_GENERAL = 'Ocurrió un error al procesar la solicitud.';
 export const MENSAJE_SESION_EXPIRADA = 'La sesión expiró. Inicie sesión nuevamente.';

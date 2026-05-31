@@ -1,6 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+import {
+  ROLE_ADMIN,
+  ROLE_EMPRESA,
+  ROLE_OFERENTE
+} from './utils/constants';
+
 import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 import EmpresaLayout from './layouts/EmpresaLayout';
@@ -52,7 +58,7 @@ function App() {
           <Route
               path="/admin"
               element={
-                <RoleRoute rolesPermitidos={['ROLE_ADMIN']}>
+                <RoleRoute rolesPermitidos={[ROLE_ADMIN]}>
                   <AdminLayout />
                 </RoleRoute>
               }
@@ -68,7 +74,7 @@ function App() {
           <Route
               path="/empresa"
               element={
-                <RoleRoute rolesPermitidos={['ROLE_EMPRESA']}>
+                <RoleRoute rolesPermitidos={[ROLE_EMPRESA]}>
                   <EmpresaLayout />
                 </RoleRoute>
               }
@@ -83,7 +89,7 @@ function App() {
           <Route
               path="/oferente"
               element={
-                <RoleRoute rolesPermitidos={['ROLE_OFERENTE']}>
+                <RoleRoute rolesPermitidos={[ROLE_OFERENTE]}>
                   <OferenteLayout />
                 </RoleRoute>
               }

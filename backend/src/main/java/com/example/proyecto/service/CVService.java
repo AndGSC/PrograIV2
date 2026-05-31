@@ -95,7 +95,7 @@ public class CVService {
     }
 
     private String generarURLPublicaCV(Integer idOferente) {
-        return baseUrl + "/api/cv/descargar/" + idOferente;
+        return baseUrl + "/api/legacy/cv/descargar/" + idOferente;
     }
 
     private void validarArchivo(MultipartFile archivo) {

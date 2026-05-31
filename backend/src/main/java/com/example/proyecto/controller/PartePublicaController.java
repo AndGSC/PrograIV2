@@ -10,6 +10,7 @@ import com.example.proyecto.service.EmpresaService;
 import com.example.proyecto.service.PuestoService;
 import com.example.proyecto.service.TipoCambioService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Controller
+@Profile("legacy")
 public class PartePublicaController {
 
     private final PuestoService puestoService;

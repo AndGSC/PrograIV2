@@ -4,11 +4,13 @@ import com.example.proyecto.logica.Usuario;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
+@Profile("legacy")
 public class AuthSessionInterceptor implements HandlerInterceptor {
 
     @Override

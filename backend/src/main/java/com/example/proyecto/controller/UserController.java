@@ -5,6 +5,7 @@ import com.example.proyecto.modelo.ModeloEmpresa;
 import com.example.proyecto.modelo.ModeloOferente;
 import com.example.proyecto.service.NacionalidadService;
 import com.example.proyecto.service.RegistroService;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 @Controller
+@Profile("legacy")
 public class UserController {
 
     private final RegistroService registroService;

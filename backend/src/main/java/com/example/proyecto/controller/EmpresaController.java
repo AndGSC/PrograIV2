@@ -16,6 +16,7 @@ import com.example.proyecto.service.OferenteService;
 import com.example.proyecto.service.PuestoCaracteristicaService;
 import com.example.proyecto.service.PuestoService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Controller
+@Profile("legacy")
 @RequestMapping("/empresa")
 public class EmpresaController {
 

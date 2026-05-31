@@ -7,8 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
 @RestController
-@RequestMapping("/diagnostico")
+@RequestMapping("/api/legacy/diagnostico")
 @CrossOrigin(origins = "*")
 public class DiagnosticoController {
 

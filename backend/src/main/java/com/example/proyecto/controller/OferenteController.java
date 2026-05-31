@@ -7,6 +7,7 @@ import com.example.proyecto.service.OferenteService;
 import com.example.proyecto.logica.Usuario;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +22,7 @@ import com.example.proyecto.logica.OferenteCaracteristica;
 import java.util.ArrayList;
 
 @Controller
+@Profile("legacy")
 @RequestMapping("/oferente")
 public class OferenteController {
     
@@ -55,7 +57,7 @@ public class OferenteController {
                 model.addAttribute("oferente", oferente.get());
                 boolean tieneCv = cvService.tieneCV(usuario.getId());
                 model.addAttribute("tieneCv", tieneCv);
-                model.addAttribute("urlDescargaCv", "/api/cv/descargar/" + usuario.getId());
+                model.addAttribute("urlDescargaCv", "/api/legacy/cv/descargar/" + usuario.getId());
             }
         }
         return "oferente/mi-cv-oferente";

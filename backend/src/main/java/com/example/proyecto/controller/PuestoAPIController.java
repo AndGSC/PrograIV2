@@ -7,8 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
+@Deprecated
 @RestController
-@RequestMapping("/api/puestos")
+@RequestMapping("/api/legacy/puestos")
 @CrossOrigin(origins = "*")
 public class PuestoAPIController {
 

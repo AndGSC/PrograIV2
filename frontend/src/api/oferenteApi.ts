@@ -4,7 +4,8 @@ import {
     API_BASE_URL,
     ENDPOINT_OFERENTE_PERFIL,
     ENDPOINT_OFERENTE_HABILIDADES,
-    ENDPOINT_OFERENTE_CV
+    ENDPOINT_OFERENTE_CV,
+    ENDPOINT_OFERENTE_CV_ARCHIVO
 } from '../utils/constants';
 
 import type {
@@ -67,5 +68,5 @@ export function subirCv(archivo: File) {
 export function obtenerUrlCv() {
     const baseUrlNormalizada = obtenerBaseUrlNormalizada();
 
-    return `${baseUrlNormalizada}${ENDPOINT_OFERENTE_CV}`;
+    return `${baseUrlNormalizada}${ENDPOINT_OFERENTE_CV_ARCHIVO}`;
 }

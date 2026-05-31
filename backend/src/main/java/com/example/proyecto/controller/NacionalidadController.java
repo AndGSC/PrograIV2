@@ -8,8 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
 @RestController
-@RequestMapping("/api/nacionalidades")
+@RequestMapping("/api/legacy/nacionalidades")
 @CrossOrigin(origins = "*")
 public class NacionalidadController {
 

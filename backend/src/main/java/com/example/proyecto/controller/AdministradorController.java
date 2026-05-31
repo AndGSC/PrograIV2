@@ -11,6 +11,7 @@ import com.example.proyecto.service.CaracteristicaService;
 import com.example.proyecto.service.ReportePuestosPdfService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 
 @Controller
+@Profile("legacy")
 @RequestMapping("/administrador")
 public class AdministradorController {
     

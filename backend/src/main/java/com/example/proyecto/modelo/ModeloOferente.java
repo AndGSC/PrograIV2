@@ -17,6 +17,7 @@ public class ModeloOferente {
     private Boolean aprobado = false;
 
     public ModeloOferente() {
+        // Requerido para data binding (Thymeleaf/Spring MVC)
     }
 
     public ModeloOferente(String identificacion,
@@ -67,21 +68,17 @@ public class ModeloOferente {
         this.apellido = apellido;
     }
 
-
     public String getNacionalidad() {
         return nacionalidad;
     }
-
 
     public void setNacionalidad(String nacionalidad) {
         this.nacionalidad = nacionalidad;
     }
 
-
     public String getCodigoNacionalidad() {
         return nacionalidad;
     }
-
 
     public void setCodigoNacionalidad(String codigoNacionalidad) {
         this.nacionalidad = codigoNacionalidad;
