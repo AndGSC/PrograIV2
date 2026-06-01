@@ -123,19 +123,20 @@ export function esRolValido(rol: string) {
 }
 
 export function normalizarRol(rol: string): RolUsuario | string {
-    const rolNormalizado = rol.trim().toUpperCase();
+    const rolLimpio = rol.trim();
+    const rolUpper = rolLimpio.toUpperCase();
 
-    if (rolNormalizado === 'ADMIN' || rolNormalizado === ROLE_ADMIN) {
+    if (rolUpper === 'ADMIN' || rolUpper === 'ROL_ADMIN') {
         return ROLE_ADMIN;
     }
 
-    if (rolNormalizado === 'EMPRESA' || rolNormalizado === ROLE_EMPRESA) {
+    if (rolUpper === 'EMPRESA' || rolUpper === 'ROL_EMPRESA') {
         return ROLE_EMPRESA;
     }
 
-    if (rolNormalizado === 'OFERENTE' || rolNormalizado === ROLE_OFERENTE) {
+    if (rolUpper === 'OFERENTE' || rolUpper === 'ROL_OFERENTE') {
         return ROLE_OFERENTE;
     }
 
-    return rolNormalizado;
+    return rolLimpio;
 }

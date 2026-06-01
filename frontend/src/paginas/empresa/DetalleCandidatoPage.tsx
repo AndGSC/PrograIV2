@@ -10,8 +10,8 @@ import {
     obtenerDetalleCandidato,
     obtenerUrlCurriculoCandidato
 } from '../../api/empresaApi';
-
 import { ApiError } from '../../api/http';
+import { obtenerToken } from '../../utils/authStorage';
 
 import type { Candidato } from '../../tipos/candidato';
 
@@ -22,6 +22,9 @@ function DetalleCandidatoPage() {
     const [mensaje, setMensaje] = useState('');
     const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('info');
     const [cargando, setCargando] = useState(true);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [cargandoPreview, setCargandoPreview] = useState(false);
+    const [mensajePreview, setMensajePreview] = useState('');
 
     useEffect(() => {
         async function cargarDetalleCandidato() {
@@ -57,15 +60,87 @@ function DetalleCandidatoPage() {
         cargarDetalleCandidato();
     }, [id]);
 
-    function verCurriculo() {
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
+
+    useEffect(() => {
         if (!id || !candidato?.cvDisponible) {
+            setPreviewUrl(null);
+            setMensajePreview('');
             return;
+        }
+
+        cargarPreviewCv();
+    }, [id, candidato?.cvDisponible]);
+
+    async function cargarPreviewCv() {
+        if (!id || !candidato?.cvDisponible) {
+            return null;
+        }
+
+        const token = obtenerToken();
+        if (!token) {
+            setMensajePreview('No hay sesión activa para cargar el currículo.');
+            setPreviewUrl(null);
+            return null;
         }
 
         const urlCurriculo = obtenerUrlCurriculoCandidato(id);
 
+        setCargandoPreview(true);
+        setMensajePreview('');
+
+        try {
+            const response = await fetch(urlCurriculo, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                setMensajePreview('No se pudo cargar el currículo para previsualizar.');
+                setPreviewUrl(null);
+                return null;
+            }
+
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
+
+            setPreviewUrl((anterior) => {
+                if (anterior) {
+                    URL.revokeObjectURL(anterior);
+                }
+                return objectUrl;
+            });
+
+            return objectUrl;
+        } catch {
+            setMensajePreview('No se pudo cargar el currículo para previsualizar.');
+            setPreviewUrl(null);
+            return null;
+        } finally {
+            setCargandoPreview(false);
+        }
+    }
+
+    async function verCurriculo() {
+        if (!id || !candidato?.cvDisponible) {
+            return;
+        }
+
+        const urlPdf = previewUrl || await cargarPreviewCv();
+
+        if (!urlPdf) {
+            return;
+        }
+
         window.open(
-            urlCurriculo,
+            urlPdf,
             '_blank',
             'noopener,noreferrer'
         );
@@ -147,13 +222,35 @@ function DetalleCandidatoPage() {
                                 onClick={verCurriculo}
                                 disabled={!candidato.cvDisponible}
                             >
-                                Ver currículo PDF
+                                Ver currículo en nueva pestaña
                             </button>
 
                             <Link to="/empresa/candidatos" className="btn btn-secondary">
                                 Volver a candidatos
                             </Link>
                         </div>
+
+                        {candidato.cvDisponible && (
+                            <div className="cv-preview mt-3">
+                                <h3 className="section-title">Previsualización</h3>
+
+                                {mensajePreview && (
+                                    <MessageBox tipo="warning" mensaje={mensajePreview} />
+                                )}
+
+                                {cargandoPreview ? (
+                                    <Loading mensaje="Cargando previsualización..." />
+                                ) : previewUrl ? (
+                                    <iframe
+                                        title="Previsualización del currículo"
+                                        className="cv-preview-frame"
+                                        src={previewUrl}
+                                    />
+                                ) : (
+                                    <p className="cv-status">No se pudo cargar la previsualización.</p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <aside className="info-card">

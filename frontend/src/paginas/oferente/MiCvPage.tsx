@@ -10,8 +10,8 @@ import {
     subirCv,
     obtenerUrlCv
 } from '../../api/oferenteApi';
-
 import { ApiError } from '../../api/http';
+import { obtenerToken } from '../../utils/authStorage';
 
 function MiCvPage() {
     const [archivo, setArchivo] = useState<File | null>(null);
@@ -21,6 +21,9 @@ function MiCvPage() {
     const [cargando, setCargando] = useState(true);
     const [subiendo, setSubiendo] = useState(false);
     const [cvUploaderKey, setCvUploaderKey] = useState(0);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [cargandoPreview, setCargandoPreview] = useState(false);
+    const [mensajePreview, setMensajePreview] = useState('');
 
     useEffect(() => {
         async function cargarInfoCv() {
@@ -53,6 +56,24 @@ function MiCvPage() {
         cargarInfoCv();
     }, []);
 
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
+
+    useEffect(() => {
+        if (!nombreArchivoActual) {
+            setPreviewUrl(null);
+            setMensajePreview('');
+            return;
+        }
+
+        cargarPreviewCv();
+    }, [nombreArchivoActual]);
+
     async function subirCurriculo(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
@@ -72,6 +93,7 @@ function MiCvPage() {
             setNombreArchivoActual(respuesta.nombreArchivo || archivo.name);
             setArchivo(null);
             setCvUploaderKey((valorActual) => valorActual + 1);
+            setPreviewUrl(null);
 
             setTipoMensaje('success');
             setMensaje('Currículo actualizado correctamente.');
@@ -98,15 +120,69 @@ function MiCvPage() {
         setMensaje(mensajeArchivo);
     }
 
-    function verCurriculo() {
+    async function cargarPreviewCv() {
         if (!nombreArchivoActual) {
-            return;
+            return null;
+        }
+
+        const token = obtenerToken();
+        if (!token) {
+            setMensajePreview('No hay sesión activa para cargar el currículo.');
+            setPreviewUrl(null);
+            return null;
         }
 
         const urlCv = obtenerUrlCv();
 
+        setCargandoPreview(true);
+        setMensajePreview('');
+
+        try {
+            const response = await fetch(urlCv, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                setMensajePreview('No se pudo cargar el currículo para previsualizar.');
+                setPreviewUrl(null);
+                return null;
+            }
+
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
+
+            setPreviewUrl((anterior) => {
+                if (anterior) {
+                    URL.revokeObjectURL(anterior);
+                }
+                return objectUrl;
+            });
+
+            return objectUrl;
+        } catch {
+            setMensajePreview('No se pudo cargar el currículo para previsualizar.');
+            setPreviewUrl(null);
+            return null;
+        } finally {
+            setCargandoPreview(false);
+        }
+    }
+
+    async function verCurriculo() {
+        if (!nombreArchivoActual) {
+            return;
+        }
+
+        const urlPdf = previewUrl || await cargarPreviewCv();
+
+        if (!urlPdf) {
+            return;
+        }
+
         window.open(
-            urlCv,
+            urlPdf,
             '_blank',
             'noopener,noreferrer'
         );
@@ -141,8 +217,28 @@ function MiCvPage() {
                                         onClick={verCurriculo}
                                         disabled={subiendo}
                                     >
-                                        Ver currículo
+                                        Ver currículo en nueva pestaña
                                     </button>
+                                </div>
+
+                                <div className="cv-preview">
+                                    <h3 className="section-title">Previsualización</h3>
+
+                                    {mensajePreview && (
+                                        <MessageBox tipo="warning" mensaje={mensajePreview} />
+                                    )}
+
+                                    {cargandoPreview ? (
+                                        <Loading mensaje="Cargando previsualización..." />
+                                    ) : previewUrl ? (
+                                        <iframe
+                                            title="Previsualización del currículo"
+                                            className="cv-preview-frame"
+                                            src={previewUrl}
+                                        />
+                                    ) : (
+                                        <p className="cv-status">No se pudo cargar la previsualización.</p>
+                                    )}
                                 </div>
                             </>
                         ) : (
