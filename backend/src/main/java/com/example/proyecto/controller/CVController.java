@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.Map;
 
-@Deprecated
 @RestController
 @RequestMapping("/api/legacy/cv")
 @CrossOrigin(origins = "*")

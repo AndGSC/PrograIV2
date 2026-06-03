@@ -11,7 +11,6 @@ import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 
-@Deprecated
 @RestController
 @RequestMapping("/api/legacy/tipocambio")
 @CrossOrigin(origins = "*")

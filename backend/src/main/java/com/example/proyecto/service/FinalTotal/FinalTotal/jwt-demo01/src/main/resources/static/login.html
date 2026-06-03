@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form method="POST">
+
+    <b>USERNAME</b>
+    <input type="username" id="username" placeholder="username">
+
+    <br>
+    <br>
+    <b>PASSWORD</b>
+    <input type="password" id="password" placeholder="password">
+
+    <button type="button" onclick="hacerLogin()">Login</button>
+
+</form>
+
+
+<script>
+
+    function hacerLogin(){
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        login(username, password);
+    }
+
+    function login(username, password) {
+
+    }
+</script>
+</body>
+</html>
