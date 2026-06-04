@@ -7,7 +7,9 @@ export interface PuestoPublico {
     id: number;
     empresa: string;
     puesto: string;
-    salario: string;
+    salarioDolares?: string;
+    salarioColones?: string;
+    salario?: string;
     tipo: string;
     descripcion?: string;
     caracteristicas?: string[];

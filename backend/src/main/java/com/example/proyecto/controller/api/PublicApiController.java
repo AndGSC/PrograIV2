@@ -6,11 +6,14 @@ import com.example.proyecto.modelo.ModeloEmpresa;
 import com.example.proyecto.modelo.ModeloOferente;
 import com.example.proyecto.service.PuestoService;
 import com.example.proyecto.service.RegistroService;
+import com.example.proyecto.service.TipoCambioService;
 import com.example.proyecto.data.PuestoCaracteristicaRepository;
 import com.example.proyecto.util.PuestoDescripcionUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,15 +24,18 @@ public class PublicApiController {
     private final RegistroService registroService;
     private final PuestoService puestoService;
     private final PuestoCaracteristicaRepository puestoCaracteristicaRepository;
+    private final TipoCambioService tipoCambioService;
 
     public PublicApiController(
             RegistroService registroService,
             PuestoService puestoService,
-            PuestoCaracteristicaRepository puestoCaracteristicaRepository
+            PuestoCaracteristicaRepository puestoCaracteristicaRepository,
+            TipoCambioService tipoCambioService
     ) {
         this.registroService = registroService;
         this.puestoService = puestoService;
         this.puestoCaracteristicaRepository = puestoCaracteristicaRepository;
+        this.tipoCambioService = tipoCambioService;
     }
 
     @PostMapping("/empresas/registro")
@@ -92,7 +98,21 @@ public class PublicApiController {
 
     private PuestoPublicoResponse mapearPuestoPublico(Puesto puesto) {
         String empresa = puesto.getIdEmpresa() != null ? puesto.getIdEmpresa().getNombre() : null;
-        String salario = puesto.getSalarioUsd() != null ? puesto.getSalarioUsd().toPlainString() : null;
+        String salarioDolares = puesto.getSalarioUsd() != null ? puesto.getSalarioUsd().toPlainString() : null;
+        
+        // Convertir USD a CRC usando el tipo de cambio actual
+        String salarioColones = null;
+        if (salarioDolares != null && !salarioDolares.isEmpty()) {
+            try {
+                BigDecimal salarioUsd = new BigDecimal(salarioDolares);
+                BigDecimal salarioCrc = tipoCambioService.convertirSalarioDolaresAColones(salarioUsd);
+                salarioColones = salarioCrc.toPlainString();
+            } catch (Exception e) {
+                // Si falla la conversión, usar el salario en dólares por defecto
+                salarioColones = salarioDolares;
+            }
+        }
+        
         String tipo = puesto.getTipoPublicacion();
 
         String titulo = PuestoDescripcionUtils.extraerTitulo(puesto.getDescripcionGeneral());
@@ -108,7 +128,8 @@ public class PublicApiController {
                 puesto.getId(),
                 empresa,
                 titulo,
-                salario,
+                salarioDolares,
+                salarioColones,
                 tipo,
                 descripcion,
                 caracteristicas
@@ -141,7 +162,8 @@ public class PublicApiController {
             Integer id,
             String empresa,
             String puesto,
-            String salario,
+            String salarioDolares,
+            String salarioColones,
             String tipo,
             String descripcion,
             List<String> caracteristicas
