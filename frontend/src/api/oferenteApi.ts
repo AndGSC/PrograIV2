@@ -4,6 +4,7 @@ import {
     API_BASE_URL,
     ENDPOINT_OFERENTE_PERFIL,
     ENDPOINT_OFERENTE_HABILIDADES,
+    ENDPOINT_OFERENTE_CARACTERISTICAS,
     ENDPOINT_OFERENTE_CV,
     ENDPOINT_OFERENTE_CV_ARCHIVO
 } from '../utils/constants';
@@ -15,7 +16,8 @@ import type {
 
 import type {
     Habilidad,
-    AgregarHabilidadRequest
+    AgregarHabilidadRequest,
+    Caracteristica
 } from '../tipos/caracteristica';
 
 function obtenerBaseUrlNormalizada() {
@@ -27,6 +29,12 @@ function obtenerBaseUrlNormalizada() {
 export function obtenerPerfilOferente() {
     return httpGet<PerfilOferente>(
         ENDPOINT_OFERENTE_PERFIL
+    );
+}
+
+export function obtenerCaracteristicasOferente() {
+    return httpGet<Caracteristica[]>(
+        ENDPOINT_OFERENTE_CARACTERISTICAS
     );
 }
 

@@ -9,8 +9,11 @@ import CaracteristicasSelector from '../../componentes/caracteristicas/Caracteri
 import {
     obtenerMisHabilidades,
     agregarHabilidad as agregarHabilidadApi,
-    eliminarHabilidad as eliminarHabilidadApi
+    eliminarHabilidad as eliminarHabilidadApi,
+    obtenerCaracteristicasOferente
 } from '../../api/oferenteApi';
+
+import type { Caracteristica } from '../../tipos/caracteristica';
 
 import { ApiError } from '../../api/http';
 
@@ -39,6 +42,8 @@ function MisHabilidadesPage() {
     const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('success');
 
     const [habilidades, setHabilidades] = useState<Habilidad[]>([]);
+    const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>([]);
+    const [cargandoCaracteristicas, setCargandoCaracteristicas] = useState(true);
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [eliminandoId, setEliminandoId] = useState<number | null>(null);
@@ -66,7 +71,20 @@ function MisHabilidadesPage() {
             }
         }
 
+        async function cargarCaracteristicas() {
+            try {
+                const datos = await obtenerCaracteristicasOferente();
+                setCaracteristicas(datos || []);
+            } catch (error) {
+                console.error('Error al cargar características:', error);
+                setCaracteristicas([]);
+            } finally {
+                setCargandoCaracteristicas(false);
+            }
+        }
+
         cargarHabilidades();
+        cargarCaracteristicas();
     }, []);
 
     async function agregarHabilidad(event: FormEvent<HTMLFormElement>) {
@@ -208,6 +226,8 @@ function MisHabilidadesPage() {
 
                         <form onSubmit={agregarHabilidad}>
                             <CaracteristicasSelector
+                                caracteristicas={caracteristicas}
+                                cargandoCaracteristicas={cargandoCaracteristicas}
                                 caracteristica={caracteristica}
                                 nivel={nivel}
                                 onCaracteristicaChange={setCaracteristica}

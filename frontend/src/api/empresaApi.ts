@@ -4,7 +4,8 @@ import type { ParametrosUrl } from './http';
 import {
     API_BASE_URL,
     ENDPOINT_EMPRESA_PUESTOS,
-    ENDPOINT_EMPRESA_CANDIDATOS
+    ENDPOINT_EMPRESA_CANDIDATOS,
+    ENDPOINT_EMPRESA_CARACTERISTICAS
 } from '../utils/constants';
 
 import type {
@@ -13,6 +14,7 @@ import type {
 } from '../tipos/puesto';
 
 import type { Candidato } from '../tipos/candidato';
+import type { Caracteristica } from '../tipos/caracteristica';
 
 export interface BuscarCandidatosParams extends ParametrosUrl {
     palabraClave?: string;
@@ -24,6 +26,12 @@ function obtenerBaseUrlNormalizada() {
     return API_BASE_URL.endsWith('/')
         ? API_BASE_URL.slice(0, -1)
         : API_BASE_URL;
+}
+
+export function obtenerCaracteristicasEmpresa() {
+    return httpGet<Caracteristica[]>(
+        ENDPOINT_EMPRESA_CARACTERISTICAS
+    );
 }
 
 export function obtenerMisPuestos() {

@@ -97,4 +97,14 @@ public class NacionalidadController {
             ));
         }
     }
+
+    @GetMapping("/nombres")
+    public ResponseEntity<List<String>> obtenerNombresNacionalidades() {
+        try {
+            List<String> nombres = nacionalidadService.obtenerNombresNacionalidadesEnMemoria();
+            return ResponseEntity.ok(nombres);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
 }

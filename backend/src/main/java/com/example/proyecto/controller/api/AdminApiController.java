@@ -1,5 +1,6 @@
 package com.example.proyecto.controller.api;
 
+import com.example.proyecto.data.CaracteristicaRepository;
 import com.example.proyecto.logica.Caracteristica;
 import com.example.proyecto.logica.Empresa;
 import com.example.proyecto.logica.Oferente;
@@ -23,6 +24,7 @@ public class AdminApiController {
     private final OferenteService oferenteService;
     private final UsuarioService usuarioService;
     private final CaracteristicaService caracteristicaService;
+    private final CaracteristicaRepository caracteristicaRepository;
     private final PuestoService puestoService;
 
     public AdminApiController(
@@ -30,12 +32,14 @@ public class AdminApiController {
             OferenteService oferenteService,
             UsuarioService usuarioService,
             CaracteristicaService caracteristicaService,
+            CaracteristicaRepository caracteristicaRepository,
             PuestoService puestoService
     ) {
         this.empresaService = empresaService;
         this.oferenteService = oferenteService;
         this.usuarioService = usuarioService;
         this.caracteristicaService = caracteristicaService;
+        this.caracteristicaRepository = caracteristicaRepository;
         this.puestoService = puestoService;
     }
 
@@ -83,7 +87,7 @@ public class AdminApiController {
 
     @GetMapping("/caracteristicas")
     public ResponseEntity<List<CaracteristicaResponse>> obtenerCaracteristicas() {
-        List<CaracteristicaResponse> caracteristicas = caracteristicaService.obtenerTodas().stream()
+        List<CaracteristicaResponse> caracteristicas = caracteristicaRepository.findAllConPadre().stream()
                 .sorted(Comparator.comparing(Caracteristica::getNombre, String.CASE_INSENSITIVE_ORDER))
                 .map(this::mapearCaracteristica)
                 .toList();

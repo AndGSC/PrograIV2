@@ -1,11 +1,12 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useState, useEffect } from 'react';
 
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
 import Loading from '../../componentes/comunes/Loading';
 
-import { registrarOferente as registrarOferenteApi } from '../../api/publicApi';
+import { registrarOferente as registrarOferenteApi, obtenerNombresNacionalidades } from '../../api/publicApi';
 import { ApiError } from '../../api/http';
+
 
 function RegistroOferentePage() {
     const [identificacion, setIdentificacion] = useState('');
@@ -20,6 +21,29 @@ function RegistroOferentePage() {
     const [mensaje, setMensaje] = useState('');
     const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('success');
     const [cargando, setCargando] = useState(false);
+    
+    const [nacionalidades, setNacionalidades] = useState<string[]>([]);
+    const [cargandoNacionalidades, setCargandoNacionalidades] = useState(true);
+    const [errorNacionalidades, setErrorNacionalidades] = useState('');
+
+    // Cargar nacionalidades al montar el componente
+    useEffect(() => {
+        cargarNacionalidades();
+    }, []);
+
+    async function cargarNacionalidades() {
+        try {
+            setCargandoNacionalidades(true);
+            setErrorNacionalidades('');
+            const datos = await obtenerNombresNacionalidades();
+            setNacionalidades(datos);
+        } catch (error) {
+            setErrorNacionalidades('No se pudieron cargar las nacionalidades. Intente recargar la página.');
+            console.error('Error al cargar nacionalidades:', error);
+        } finally {
+            setCargandoNacionalidades(false);
+        }
+    }
 
     async function registrarOferente(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -86,6 +110,12 @@ function RegistroOferentePage() {
 
             <MessageBox tipo={tipoMensaje} mensaje={mensaje} />
 
+            {cargandoNacionalidades ? (
+                <Loading mensaje="Cargando nacionalidades..." />
+            ) : errorNacionalidades ? (
+                <MessageBox tipo="danger" mensaje={errorNacionalidades} />
+            ) : null}
+
             {cargando && (
                 <Loading mensaje="Enviando solicitud de registro..." />
             )}
@@ -101,7 +131,7 @@ function RegistroOferentePage() {
                                 value={identificacion}
                                 onChange={(event) => setIdentificacion(event.target.value)}
                                 required
-                                disabled={cargando}
+                                disabled={cargando || cargandoNacionalidades}
                             />
                         </div>
 
@@ -113,7 +143,7 @@ function RegistroOferentePage() {
                                 value={nombre}
                                 onChange={(event) => setNombre(event.target.value)}
                                 required
-                                disabled={cargando}
+                                disabled={cargando || cargandoNacionalidades}
                             />
                         </div>
                     </div>
@@ -127,20 +157,26 @@ function RegistroOferentePage() {
                                 value={primerApellido}
                                 onChange={(event) => setPrimerApellido(event.target.value)}
                                 required
-                                disabled={cargando}
+                                disabled={cargando || cargandoNacionalidades}
                             />
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="nacionalidad">Nacionalidad</label>
-                            <input
+                            <select
                                 id="nacionalidad"
-                                type="text"
                                 value={nacionalidad}
                                 onChange={(event) => setNacionalidad(event.target.value)}
                                 required
-                                disabled={cargando}
-                            />
+                                disabled={cargando || cargandoNacionalidades}
+                            >
+                                <option value="">Seleccione una nacionalidad</option>
+                                {nacionalidades.map((nac) => (
+                                    <option key={nac} value={nac}>
+                                        {nac}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 
@@ -153,7 +189,7 @@ function RegistroOferentePage() {
                                 value={telefono}
                                 onChange={(event) => setTelefono(event.target.value)}
                                 required
-                                disabled={cargando}
+                                disabled={cargando || cargandoNacionalidades}
                             />
                         </div>
 
@@ -165,7 +201,7 @@ function RegistroOferentePage() {
                                 value={correo}
                                 onChange={(event) => setCorreo(event.target.value)}
                                 required
-                                disabled={cargando}
+                                disabled={cargando || cargandoNacionalidades}
                             />
                         </div>
                     </div>
@@ -178,7 +214,7 @@ function RegistroOferentePage() {
                             value={residencia}
                             onChange={(event) => setResidencia(event.target.value)}
                             required
-                            disabled={cargando}
+                            disabled={cargando || cargandoNacionalidades}
                         />
                     </div>
 
@@ -190,7 +226,7 @@ function RegistroOferentePage() {
                             value={clave}
                             onChange={(event) => setClave(event.target.value)}
                             required
-                            disabled={cargando}
+                            disabled={cargando || cargandoNacionalidades}
                         />
                     </div>
 
@@ -198,7 +234,7 @@ function RegistroOferentePage() {
                         <button
                             type="submit"
                             className="btn btn-primary"
-                            disabled={cargando}
+                            disabled={cargando || cargandoNacionalidades}
                         >
                             {cargando ? 'Enviando...' : 'Enviar solicitud'}
                         </button>
@@ -207,7 +243,7 @@ function RegistroOferentePage() {
                             type="button"
                             className="btn btn-secondary"
                             onClick={limpiarFormulario}
-                            disabled={cargando}
+                            disabled={cargando || cargandoNacionalidades}
                         >
                             Limpiar
                         </button>

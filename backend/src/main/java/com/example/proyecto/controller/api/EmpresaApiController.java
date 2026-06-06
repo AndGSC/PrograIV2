@@ -1,5 +1,6 @@
 package com.example.proyecto.controller.api;
 
+import com.example.proyecto.data.CaracteristicaRepository;
 import com.example.proyecto.data.OferenteCaracteristicaRepository;
 import com.example.proyecto.logica.CalculadoraCoincidencia;
 import com.example.proyecto.logica.Caracteristica;
@@ -39,6 +40,7 @@ public class EmpresaApiController {
     private final PuestoService puestoService;
     private final PuestoCaracteristicaService puestoCaracteristicaService;
     private final CaracteristicaService caracteristicaService;
+    private final CaracteristicaRepository caracteristicaRepository;
     private final OferenteService oferenteService;
     private final OferenteCaracteristicaRepository oferenteCaracteristicaRepository;
     private final CalculadoraCoincidencia calculadoraCoincidencia;
@@ -49,6 +51,7 @@ public class EmpresaApiController {
             PuestoService puestoService,
             PuestoCaracteristicaService puestoCaracteristicaService,
             CaracteristicaService caracteristicaService,
+            CaracteristicaRepository caracteristicaRepository,
             OferenteService oferenteService,
             OferenteCaracteristicaRepository oferenteCaracteristicaRepository,
             CalculadoraCoincidencia calculadoraCoincidencia,
@@ -58,10 +61,24 @@ public class EmpresaApiController {
         this.puestoService = puestoService;
         this.puestoCaracteristicaService = puestoCaracteristicaService;
         this.caracteristicaService = caracteristicaService;
+        this.caracteristicaRepository = caracteristicaRepository;
         this.oferenteService = oferenteService;
         this.oferenteCaracteristicaRepository = oferenteCaracteristicaRepository;
         this.calculadoraCoincidencia = calculadoraCoincidencia;
         this.cvService = cvService;
+    }
+
+    @GetMapping("/caracteristicas")
+    public ResponseEntity<List<CaracteristicaResponse>> obtenerCaracteristicas() {
+        List<CaracteristicaResponse> lista = caracteristicaRepository.findAllConPadre().stream()
+                .map(c -> new CaracteristicaResponse(
+                        c.getId(),
+                        c.getNombre(),
+                        c.getIdPadre() != null ? c.getIdPadre().getNombre() : "General"
+                ))
+                .sorted(Comparator.comparing(CaracteristicaResponse::nombre, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/puestos")
@@ -416,6 +433,13 @@ public class EmpresaApiController {
             long coincidencia,
             boolean cvDisponible,
             List<String> habilidades
+    ) {
+    }
+
+    public record CaracteristicaResponse(
+            Integer id,
+            String nombre,
+            String categoria
     ) {
     }
 }

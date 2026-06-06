@@ -35,8 +35,8 @@ public class NacionalidadService {
     private static final String NACIONALIDADES_FILE = "docs/nacionalidades.xlsx";
 
     private static final int COL_ISO = 0;
-    private static final int COL_NOMBRE = 1;
-    private static final int COL_ISO3 = 3;
+    private static final int COL_ISO3 = 1;
+    private static final int COL_NOMBRE = 3;
 
     private final DataFormatter dataFormatter = new DataFormatter();
 
@@ -57,26 +57,46 @@ public class NacionalidadService {
                 throw new IllegalStateException("No se encontraron nacionalidades validas en el archivo Excel.");
             }
 
+            // Cargar todas las nacionalidades existentes en BD una sola vez
+            List<Nacionalidad> bdExistentes = nacionalidadRepository.findAllByOrderByNombreAsc();
+            Map<String, Nacionalidad> porCodigo = new LinkedHashMap<>();
+            Map<String, Nacionalidad> porNombre = new LinkedHashMap<>();
+            
+            for (Nacionalidad nac : bdExistentes) {
+                if (nac.getCodigo() != null && !nac.getCodigo().isBlank()) {
+                    porCodigo.put(nac.getCodigo().toUpperCase(Locale.ROOT), nac);
+                }
+                if (nac.getNombre() != null && !nac.getNombre().isBlank()) {
+                    porNombre.put(nac.getNombre(), nac);
+                }
+            }
+
             int creadas = 0;
             int actualizadas = 0;
             int omitidas = 0;
+            List<Nacionalidad> paraActualizar = new ArrayList<>();
 
             for (Nacionalidad nacionalidadExcel : nacionalidades) {
                 try {
-                    Optional<Nacionalidad> existente = nacionalidadRepository.findByCodigo(nacionalidadExcel.getCodigo());
-                    if (existente.isEmpty()) {
-                        existente = nacionalidadRepository.findByNombre(nacionalidadExcel.getNombre());
+                    // Buscar en los mapas en memoria en lugar de en BD
+                    Nacionalidad actual = porCodigo.get(nacionalidadExcel.getCodigo());
+                    if (actual == null) {
+                        actual = porNombre.get(nacionalidadExcel.getNombre());
                     }
 
-                    if (existente.isPresent()) {
-                        Nacionalidad actual = existente.get();
+                    if (actual != null) {
                         boolean cambio = false;
 
                         String codigoNuevo = limpiarTexto(nacionalidadExcel.getCodigo()).toUpperCase(Locale.ROOT);
                         if (esCodigoValido(codigoNuevo) && !Objects.equals(actual.getCodigo(), codigoNuevo)) {
-                            Optional<Nacionalidad> conflictoCodigo = nacionalidadRepository.findByCodigo(codigoNuevo);
-                            if (conflictoCodigo.isEmpty() || Objects.equals(conflictoCodigo.get().getId(), actual.getId())) {
+                            // Verificar si el nuevo codigo ya existe en el mapa
+                            if (!porCodigo.containsKey(codigoNuevo) || Objects.equals(porCodigo.get(codigoNuevo).getId(), actual.getId())) {
+                                // Remover del mapa anterior si cambio
+                                if (actual.getCodigo() != null) {
+                                    porCodigo.remove(actual.getCodigo());
+                                }
                                 actual.setCodigo(codigoNuevo);
+                                porCodigo.put(codigoNuevo, actual);
                                 cambio = true;
                             } else {
                                 logger.warn("Se omite actualizacion de codigo para '{}' por conflicto con codigo '{}'", actual.getNombre(), codigoNuevo);
@@ -84,9 +104,14 @@ public class NacionalidadService {
                         }
 
                         if (!Objects.equals(actual.getNombre(), nacionalidadExcel.getNombre())) {
-                            Optional<Nacionalidad> conflictoNombre = nacionalidadRepository.findByNombre(nacionalidadExcel.getNombre());
-                            if (conflictoNombre.isEmpty() || Objects.equals(conflictoNombre.get().getId(), actual.getId())) {
+                            // Verificar si el nuevo nombre ya existe en el mapa
+                            if (!porNombre.containsKey(nacionalidadExcel.getNombre()) || Objects.equals(porNombre.get(nacionalidadExcel.getNombre()).getId(), actual.getId())) {
+                                // Remover del mapa anterior si cambio
+                                if (actual.getNombre() != null) {
+                                    porNombre.remove(actual.getNombre());
+                                }
                                 actual.setNombre(nacionalidadExcel.getNombre());
+                                porNombre.put(nacionalidadExcel.getNombre(), actual);
                                 cambio = true;
                             } else {
                                 logger.warn("Se omite actualizacion de nombre para codigo '{}' por conflicto de nombre '{}'", actual.getCodigo(), nacionalidadExcel.getNombre());
@@ -99,12 +124,14 @@ public class NacionalidadService {
                         }
 
                         if (cambio) {
-                            nacionalidadRepository.save(actual);
+                            paraActualizar.add(actual);
                             actualizadas++;
                         }
                     } else {
                         nacionalidadExcel.setActivo(true);
-                        nacionalidadRepository.save(nacionalidadExcel);
+                        paraActualizar.add(nacionalidadExcel);
+                        porCodigo.put(nacionalidadExcel.getCodigo(), nacionalidadExcel);
+                        porNombre.put(nacionalidadExcel.getNombre(), nacionalidadExcel);
                         creadas++;
                     }
                 } catch (DataIntegrityViolationException e) {
@@ -114,6 +141,11 @@ public class NacionalidadService {
                             nacionalidadExcel.getCodigo(),
                             e.getMostSpecificCause() != null ? e.getMostSpecificCause().getMessage() : e.getMessage());
                 }
+            }
+
+            // Guardar todos los cambios en una sola operacion batch
+            if (!paraActualizar.isEmpty()) {
+                nacionalidadRepository.saveAll(paraActualizar);
             }
 
             logger.info("Nacionalidades sincronizadas. Leidas: {}, creadas: {}, actualizadas: {}, omitidas: {}",

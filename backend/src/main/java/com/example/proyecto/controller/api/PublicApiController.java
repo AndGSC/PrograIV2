@@ -39,32 +39,40 @@ public class PublicApiController {
     }
 
     @PostMapping("/empresas/registro")
-    public ResponseEntity<Void> registrarEmpresa(@RequestBody RegistroEmpresaRequest request) {
-        ModeloEmpresa modelo = new ModeloEmpresa();
-        modelo.setNombre(request.nombre());
-        modelo.setLocalizacion(request.localizacion());
-        modelo.setEmail(request.correo());
-        modelo.setTelefono(request.telefono());
-        modelo.setDescripcion(request.descripcion());
-        modelo.setClave(request.clave());
-        registroService.registrarEmpresa(modelo);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> registrarEmpresa(@RequestBody RegistroEmpresaRequest request) {
+        try {
+            ModeloEmpresa modelo = new ModeloEmpresa();
+            modelo.setNombre(request.nombre());
+            modelo.setLocalizacion(request.localizacion());
+            modelo.setEmail(request.correo());
+            modelo.setTelefono(request.telefono());
+            modelo.setDescripcion(request.descripcion());
+            modelo.setClave(request.clave());
+            registroService.registrarEmpresa(modelo);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @PostMapping("/oferentes/registro")
-    public ResponseEntity<Void> registrarOferente(@RequestBody RegistroOferenteRequest request) {
-        ModeloOferente modelo = new ModeloOferente(
-                request.identificacion(),
-                request.nombre(),
-                request.primerApellido(),
-                request.nacionalidad(),
-                request.telefono(),
-                request.correo(),
-                request.residencia()
-        );
-        modelo.setClave(request.clave());
-        registroService.registrarOferente(modelo);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> registrarOferente(@RequestBody RegistroOferenteRequest request) {
+        try {
+            ModeloOferente modelo = new ModeloOferente(
+                    request.identificacion(),
+                    request.nombre(),
+                    request.primerApellido(),
+                    request.nacionalidad(),
+                    request.telefono(),
+                    request.correo(),
+                    request.residencia()
+            );
+            modelo.setClave(request.clave());
+            registroService.registrarOferente(modelo);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @GetMapping("/puestos")
@@ -168,6 +176,9 @@ public class PublicApiController {
             String descripcion,
             List<String> caracteristicas
     ) {
+    }
+
+    public record ErrorResponse(String mensaje) {
     }
 }
 

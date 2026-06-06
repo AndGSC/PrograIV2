@@ -153,10 +153,6 @@ function DashboardOferentePage() {
                                 <Link to="/oferente/cv" className="btn btn-secondary">
                                     Subir currículo
                                 </Link>
-
-                                <Link to="/puestos" className="btn btn-outline-dark">
-                                    Buscar puestos públicos
-                                </Link>
                             </div>
                         </div>
                     </section>

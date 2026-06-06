@@ -39,12 +39,6 @@ function NavEmpresa() {
                                 Publicar puesto
                             </NavLink>
                         </li>
-
-                        <li>
-                            <NavLink to="/empresa/candidatos">
-                                Buscar candidatos
-                            </NavLink>
-                        </li>
                     </ul>
                 </div>
 

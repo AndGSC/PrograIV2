@@ -38,11 +38,16 @@ export const ENDPOINT_ADMIN_REPORTES = `${API_PREFIX}/admin/reportes`;
 
 export const ENDPOINT_EMPRESA_PUESTOS = `${API_PREFIX}/empresa/puestos`;
 export const ENDPOINT_EMPRESA_CANDIDATOS = `${API_PREFIX}/empresa/candidatos`;
+export const ENDPOINT_EMPRESA_CARACTERISTICAS = `${API_PREFIX}/empresa/caracteristicas`;
 
 export const ENDPOINT_OFERENTE_PERFIL = `${API_PREFIX}/oferente/perfil`;
 export const ENDPOINT_OFERENTE_HABILIDADES = `${API_PREFIX}/oferente/habilidades`;
+export const ENDPOINT_OFERENTE_CARACTERISTICAS = `${API_PREFIX}/oferente/caracteristicas`;
 export const ENDPOINT_OFERENTE_CV = `${API_PREFIX}/oferente/cv`;
 export const ENDPOINT_OFERENTE_CV_ARCHIVO = `${API_PREFIX}/oferente/cv/archivo`;
+
+export const ENDPOINT_NACIONALIDADES = `${API_PREFIX}/legacy/nacionalidades/activas`;
+export const ENDPOINT_NACIONALIDADES_NOMBRES = `${API_PREFIX}/legacy/nacionalidades/nombres`;
 
 export const MENSAJE_ERROR_GENERAL = 'Ocurrió un error al procesar la solicitud.';
 export const MENSAJE_SESION_EXPIRADA = 'La sesión expiró. Inicie sesión nuevamente.';

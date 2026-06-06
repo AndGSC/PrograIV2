@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import PageHeader from '../../componentes/comunes/PageHeader';
@@ -6,9 +6,10 @@ import MessageBox from '../../componentes/comunes/MessageBox';
 import Loading from '../../componentes/comunes/Loading';
 import CaracteristicasSelector from '../../componentes/caracteristicas/CaracteristicasSelector';
 
-import { publicarPuesto as publicarPuestoApi } from '../../api/empresaApi';
+import { publicarPuesto as publicarPuestoApi, obtenerCaracteristicasEmpresa } from '../../api/empresaApi';
 import { ApiError } from '../../api/http';
 
+import type { Caracteristica } from '../../tipos/caracteristica';
 import type { RequisitoPuesto } from '../../tipos/puesto';
 
 function obtenerTextoNivel(nivel: string) {
@@ -36,9 +37,27 @@ function PublicarPuestoPage() {
     const [nivel, setNivel] = useState('');
     const [requisitos, setRequisitos] = useState<RequisitoPuesto[]>([]);
 
+    const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>([]);
+    const [cargandoCaracteristicas, setCargandoCaracteristicas] = useState(true);
+
     const [mensaje, setMensaje] = useState('');
     const [tipoMensaje, setTipoMensaje] = useState<'success' | 'info' | 'danger' | 'warning'>('info');
     const [cargando, setCargando] = useState(false);
+
+    useEffect(() => {
+        async function cargarCaracteristicas() {
+            try {
+                const datos = await obtenerCaracteristicasEmpresa();
+                setCaracteristicas(datos || []);
+            } catch (error) {
+                console.error('Error al cargar características:', error);
+                setCaracteristicas([]);
+            } finally {
+                setCargandoCaracteristicas(false);
+            }
+        }
+        cargarCaracteristicas();
+    }, []);
 
     function agregarRequisito() {
         if (caracteristica.trim() === '' || nivel.trim() === '') {
@@ -207,6 +226,8 @@ function PublicarPuestoPage() {
                         </div>
 
                         <CaracteristicasSelector
+                            caracteristicas={caracteristicas}
+                            cargandoCaracteristicas={cargandoCaracteristicas}
                             caracteristica={caracteristica}
                             nivel={nivel}
                             onCaracteristicaChange={setCaracteristica}

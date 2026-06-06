@@ -1,5 +1,6 @@
 package com.example.proyecto.controller.api;
 
+import com.example.proyecto.data.CaracteristicaRepository;
 import com.example.proyecto.logica.Caracteristica;
 import com.example.proyecto.logica.Oferente;
 import com.example.proyecto.logica.OferenteCaracteristica;
@@ -17,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -27,6 +29,7 @@ public class OferenteApiController {
     private final UsuarioService usuarioService;
     private final OferenteService oferenteService;
     private final CaracteristicaService caracteristicaService;
+    private final CaracteristicaRepository caracteristicaRepository;
     private final CVService cvService;
 
     private final String baseUrl;
@@ -35,14 +38,29 @@ public class OferenteApiController {
             UsuarioService usuarioService,
             OferenteService oferenteService,
             CaracteristicaService caracteristicaService,
+            CaracteristicaRepository caracteristicaRepository,
             CVService cvService,
             @Value("${app.cv.base-url:http://localhost:8080}") String baseUrl
     ) {
         this.usuarioService = usuarioService;
         this.oferenteService = oferenteService;
         this.caracteristicaService = caracteristicaService;
+        this.caracteristicaRepository = caracteristicaRepository;
         this.cvService = cvService;
         this.baseUrl = baseUrl;
+    }
+
+    @GetMapping("/caracteristicas")
+    public ResponseEntity<List<CaracteristicaResponse>> obtenerCaracteristicas() {
+        List<CaracteristicaResponse> lista = caracteristicaRepository.findAllConPadre().stream()
+                .map(c -> new CaracteristicaResponse(
+                        c.getId(),
+                        c.getNombre(),
+                        c.getIdPadre() != null ? c.getIdPadre().getNombre() : "General"
+                ))
+                .sorted(Comparator.comparing(CaracteristicaResponse::nombre, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/perfil")
@@ -265,6 +283,9 @@ public class OferenteApiController {
     }
 
     public record CvResponse(String nombreArchivo, String url) {
+    }
+
+    public record CaracteristicaResponse(Integer id, String nombre, String categoria) {
     }
 }
 
