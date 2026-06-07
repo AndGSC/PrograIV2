@@ -44,10 +44,6 @@ export default function PuestoDetalleModal({ puesto, open, onClose }: Props) {
 			) : (
 				<p>No hay características registradas.</p>
 			)}
-
-			<div className="modal-actions">
-				<button className="btn btn-secondary" onClick={onClose}>Cerrar</button>
-			</div>
 		</Modal>
 	);
 }

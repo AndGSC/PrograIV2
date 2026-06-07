@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import PageHeader from '../../componentes/comunes/PageHeader';
 import MessageBox from '../../componentes/comunes/MessageBox';
 import Loading from '../../componentes/comunes/Loading';
+import jsPDF from 'jspdf';
 
 import { obtenerReportesAdmin } from '../../api/adminApi';
 import { ApiError } from '../../api/http';
@@ -50,6 +51,39 @@ function ReportesAdminPage() {
 
         cargarReportes();
     }, []);
+
+    const descargarPDF = () => {
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text('Reporte Administrativo', 20, 20);
+
+        doc.setFontSize(12);
+
+        let y = 40;
+
+        doc.text(`Empresas aprobadas: ${reporte.empresasAprobadas}`, 20, y);
+        y += 10;
+
+        doc.text(`Oferentes aprobados: ${reporte.oferentesAprobados}`, 20, y);
+        y += 10;
+
+        doc.text(`Puestos públicos: ${reporte.puestosPublicos}`, 20, y);
+        y += 10;
+
+        doc.text(`Empresas pendientes: ${reporte.empresasPendientes}`, 20, y);
+        y += 10;
+
+        doc.text(`Oferentes pendientes: ${reporte.oferentesPendientes}`, 20, y);
+        y += 10;
+
+        doc.text(`Características activas: ${reporte.caracteristicasActivas}`, 20, y);
+        y += 10;
+
+        doc.text(`Características inactivas: ${reporte.caracteristicasInactivas}`, 20, y);
+
+        doc.save('reporte-administrativo.pdf');
+    };
 
     return (
         <>
@@ -122,6 +156,18 @@ function ReportesAdminPage() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </section>
+
+                    <section className="section-block mt-3">
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={descargarPDF}
+                            >
+                                Descargar PDF
+                            </button>
                         </div>
                     </section>
                 </>

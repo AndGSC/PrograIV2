@@ -38,10 +38,6 @@ function PuestoCard({ puesto, detalleUrl }: PuestoCardProps) {
                 <span className="badge badge-info job-type">
                     {puesto.tipo}
                 </span>
-
-                <Link to={urlDetalle} className="job-detail-btn">
-                    Ver detalle
-                </Link>
             </div>
 
             <div className="job-hover-detail">

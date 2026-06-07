@@ -88,21 +88,6 @@ function BuscarPuestosPage() {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="nivel">Nivel</label>
-                            <select
-                                id="nivel"
-                                value={nivel}
-                                onChange={(event) => setNivel(event.target.value)}
-                                disabled={cargando}
-                            >
-                                <option value="">Todos</option>
-                                <option value="BASICO">Básico</option>
-                                <option value="INTERMEDIO">Intermedio</option>
-                                <option value="AVANZADO">Avanzado</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group">
                             <button
                                 type="submit"
                                 className="btn btn-primary w-100"
