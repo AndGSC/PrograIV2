@@ -18,6 +18,12 @@ function NavAdmin() {
             <nav className="nav-container">
                 <div className="nav-left">
                     <NavLink to="/admin" className="logo-link">
+                        <img
+                            src="/logo-empresa.png"
+                            alt="Logo Bolsa de Empleo"
+                            className="logo-img"
+                        />
+
                         <span className="logo-text">Panel Administrador</span>
                     </NavLink>
 

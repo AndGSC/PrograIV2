@@ -18,6 +18,12 @@ function NavOferente() {
             <nav className="nav-container">
                 <div className="nav-left">
                     <NavLink to="/oferente" className="logo-link">
+                        <img
+                            src="/logo-empresa.png"
+                            alt="Logo Bolsa de Empleo"
+                            className="logo-img"
+                        />
+
                         <span className="logo-text">Panel Oferente</span>
                     </NavLink>
 
